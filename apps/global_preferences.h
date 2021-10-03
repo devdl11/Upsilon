@@ -30,11 +30,17 @@ public:
   void setTempExamMode(ExamMode examMode);
   bool showPopUp() const { return m_showPopUp; }
   void setShowPopUp(bool showPopUp) { m_showPopUp = showPopUp; }
+  bool dfuStatus() const {return m_dfu_unlocked;}
+  void setDfuStatus(bool status) {m_dfu_unlocked=status;}
+  int dfuCurrentStep() const {return m_dfu_step;}
+  void dfuIncreaseStep() {m_dfu_step++;}
+  void dfuResetStep() {m_dfu_step = 0;}
   int brightnessLevel() const { return m_brightnessLevel; }
   void setBrightnessLevel(int brightnessLevel);
   const KDFont * font() const { return m_font; }
   void setFont(const KDFont * font) { m_font = font; }
   constexpr static int NumberOfBrightnessStates = 15;
+  constexpr static int DfuUnlockStep = 3;
 private:
   static_assert(I18n::NumberOfLanguages > 0, "I18n::NumberOfLanguages is not superior to 0"); // There should already have been an error when processing an empty EPSILON_I18N flag
   static_assert(I18n::NumberOfCountries > 0, "I18n::NumberOfCountries is not superior to 0"); // There should already have been an error when processing an empty EPSILON_COUNTRIES flag
@@ -44,6 +50,8 @@ private:
     m_examMode(ExamMode::Unknown),
     m_tempExamMode(ExamMode::Standard),
     m_showPopUp(true),
+    m_dfu_unlocked(false),
+    m_dfu_step(0),
     m_brightnessLevel(Ion::Backlight::MaxBrightness),
     m_font(KDFont::LargeFont) {}
   I18n::Language m_language;
@@ -53,6 +61,8 @@ private:
   mutable ExamMode m_examMode;
   mutable ExamMode m_tempExamMode;
   bool m_showPopUp;
+  bool m_dfu_unlocked;
+  int m_dfu_step;
   int m_brightnessLevel;
   const KDFont * m_font;
 };

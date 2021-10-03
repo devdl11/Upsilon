@@ -27,6 +27,8 @@ App::App(Snapshot * snapshot) :
 }
 
 bool App::processEvent(Ion::Events::Event e) {
+  // Ne fonctionne pas pour l'instant fait bugger les events
+  //bool handled = m_usbConnectedController.handleEvent(e);
   return false;
 }
 
