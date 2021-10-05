@@ -106,15 +106,17 @@ bool Controller::handleEvent(Ion::Events::Event event) {
       GlobalPreferences::sharedGlobalPreferences()->setDfuStatus(false);
     }
   }else{
+    
+  }
+  if (event == Ion::Events::OK || event == Ion::Events::EXE) {
+    AppsContainer * container = AppsContainer::sharedAppsContainer();
+
     if(!GlobalPreferences::sharedGlobalPreferences()->isInExamMode()){
         Ion::LED::setColor(KDColorBlack);
         // Ion::LED::setBlinking(1000, 0.1f);
       }
     GlobalPreferences::sharedGlobalPreferences()->dfuResetStep();
     GlobalPreferences::sharedGlobalPreferences()->setDfuStatus(false);
-  }
-  if (event == Ion::Events::OK || event == Ion::Events::EXE) {
-    AppsContainer * container = AppsContainer::sharedAppsContainer();
 
     int index = selectionDataSource()->selectedRow()*k_numberOfColumns+selectionDataSource()->selectedColumn()+1;
 #ifdef HOME_DISPLAY_EXTERNALS

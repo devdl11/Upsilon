@@ -101,8 +101,8 @@ namespace Ion
               writeOnMemory();
             }
             changeAddressPointerIfNeeded();
-            // eraseMemoryIfNeeded();
-            eraseMemoryIfNeededWithoutErasingAtAll();
+            eraseMemoryIfNeeded();
+            // eraseMemoryIfNeededWithoutErasingAtAll();
             m_state = State::dfuDNLOADIDLE;
           }
         }
@@ -233,7 +233,7 @@ namespace Ion
         // Sector erase
         assert(transferBufferLength == 5);
 
-        uint32_t eraseAddress = transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
+        eraseAddress = transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
 
         m_erasePage = Flash::SectorAtAddress(eraseAddress);
         if (m_erasePage < 0)
@@ -250,6 +250,13 @@ namespace Ion
         {
           return;
         }
+        willErase();
+        if(eraseAddress >= k_ExternalBorderAddress && eraseAddress < ExternalFlash::Config::EndAddress){
+          int32_t order = Flash::SectorAtAddress(eraseAddress);
+          Flash::EraseSector(order);
+        }
+        m_state = State::dfuDNLOADIDLE;
+        m_status = Status::OK;
         m_erasePage = -1;
       }
 
@@ -322,7 +329,7 @@ namespace Ion
           {
             current_memory_flashed = 1;
             // Nous écrivons la partie external os
-            if ((m_writeAddress < k_ExternalBorderAddress) && m_isFirstExternalFlash && !m_dfuUnlocked) // On vérifie si on installe des apps ext
+            if (m_writeAddress < k_ExternalBorderAddress && m_isFirstExternalFlash && !m_dfuUnlocked) // On vérifie si on installe des apps ext
             {
               // Partie moche du code parce que je n'arrivais pas à compil avec 3 boucles for
               int adress_magik = magik_ext_adrs[0];
@@ -510,8 +517,8 @@ namespace Ion
 
           m_erasePage = Flash::SectorAtAddress(m_writeAddress);
 
-          //On vérifie qu'on a pas déjà effacé le secteur
-          if (last_memory_flashed < 0 || m_erasePage != m_last_page_erased)
+          //On vérifie qu'on a pas déjà effacé le secteur et si ce n'est pas un secteur external déjà effacé
+          if (last_memory_flashed < 0 || m_erasePage != m_last_page_erased && m_writeAddress < k_ExternalBorderAddress)
           {
             Flash::EraseSector(m_erasePage);
             last_memory_flashed = current_memory_flashed;

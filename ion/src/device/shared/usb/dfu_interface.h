@@ -32,6 +32,7 @@ namespace Ion
                                                                                            m_largeBuffer{0},
                                                                                            m_largeBufferLength(0),
                                                                                            m_writeAddress(0),
+                                                                                           eraseAddress(0),
                                                                                            m_bInterfaceAlternateSetting(bInterfaceAlternateSetting),
                                                                                            m_isErasingAndWriting(false),
                                                                                            m_isFirstInternalFlash(true),
@@ -202,6 +203,7 @@ namespace Ion
         uint8_t m_largeBuffer[Endpoint0::MaxTransferSize];
         uint16_t m_largeBufferLength;
         uint32_t m_writeAddress;
+        uint32_t eraseAddress;
         uint8_t m_bInterfaceAlternateSetting;
         bool m_isErasingAndWriting;
         bool m_isFirstInternalFlash;
