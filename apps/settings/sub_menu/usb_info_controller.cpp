@@ -73,11 +73,23 @@ namespace Settings
   void UsbInfoController::willDisplayCellForIndex(HighlightCell *celll, int index)
   {
     assert(index >= 0 && index <= k_maxNumberOfCells);
+
     GenericSubController::willDisplayCellForIndex(celll, index);
 
     MessageTableCellWithBuffer *myCell = (MessageTableCellWithBuffer *)celll;
 
     myCell->setMessage(text[index]);
+    if (text[index] == I18n::Message::UsbExplaination3)
+    {
+      if (!GlobalPreferences::sharedGlobalPreferences()->dfuStatus())
+      {
+        myCell->setAccessoryText("Protected");
+      }
+      else
+      {
+        myCell->setAccessoryText("Unprotected");
+      }
+    }
   }
 
   void UsbInfoController::didEnterResponderChain(Responder *previousFirstResponder)

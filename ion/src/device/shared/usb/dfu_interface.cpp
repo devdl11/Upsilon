@@ -518,7 +518,7 @@ namespace Ion
           m_erasePage = Flash::SectorAtAddress(m_writeAddress);
 
           //On vérifie qu'on a pas déjà effacé le secteur et si ce n'est pas un secteur external déjà effacé
-          if (last_memory_flashed < 0 || m_erasePage != m_last_page_erased && m_writeAddress < k_ExternalBorderAddress)
+          if ((last_memory_flashed < 0 || m_erasePage != m_last_page_erased) && m_writeAddress < k_ExternalBorderAddress)
           {
             Flash::EraseSector(m_erasePage);
             last_memory_flashed = current_memory_flashed;
