@@ -92,7 +92,7 @@ bool Controller::handleEvent(Ion::Events::Event event) {
     if(GlobalPreferences::sharedGlobalPreferences()->dfuCurrentStep() >= GlobalPreferences::DfuUnlockStep && !GlobalPreferences::sharedGlobalPreferences()->dfuStatus()){
       if(!GlobalPreferences::sharedGlobalPreferences()->isInExamMode()){
         Ion::LED::setColor(KDColorPurple);
-        Ion::LED::setBlinking(500, 0.1f);
+        Ion::LED::setBlinking(500, 0.5f);
       }
       GlobalPreferences::sharedGlobalPreferences()->setDfuStatus(true);
       App::app()->displayWarning(I18n::Message::DfuWarning1, I18n::Message::DfuWarning2);

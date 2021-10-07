@@ -184,8 +184,7 @@ namespace Ion
         // Abort
         bool dfuAbort(uint16_t *transferBufferLength);
         // Leave DFU
-        void leaveDFUAndReset() {leaveDFUAndReset(true);};
-        void leaveDFUAndReset(bool val);
+        void leaveDFUAndReset(bool do_reset=true);
         /* Erase and Write state. After starting the erase of flash memory, the user
    * can no longer leave DFU mode by pressing the Back key of the keyboard. This
    * way, we prevent the user from interrupting a software download. After every

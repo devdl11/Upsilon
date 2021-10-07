@@ -18,15 +18,16 @@ public:
   HighlightCell * reusableCell(int index, int type) override;
   int reusableCellCount(int type) override;
   void willDisplayCellForIndex(HighlightCell * cell, int index) override;
+  int typeAtLocation(int i, int j) override;
 
 private:
-  static constexpr int k_numberOfDeactivationMessageLines = 3;
-  static constexpr int k_numberOfCautionMessageLines = 3;
-  int numberOfCautionLines() const {return k_numberOfCautionMessageLines;};
-  static constexpr int k_maxNumberOfCells = 3;
-  MessageTableCellWithBuffer m_cell[k_maxNumberOfCells];
+  static constexpr int k_numberOfInfoE16MessageLines = 3;
+  int numberOfInfoLines() const {return k_numberOfInfoE16MessageLines;};
+  // static constexpr int k_maxNumberOfCells = 3;
+  static constexpr int k_maxSwitchCells = 1;
+  // MessageTableCellWithBuffer m_cell[k_maxNumberOfCells];
+  MessageTableCellWithSwitch m_switchCells[k_maxSwitchCells];
   SelectableViewWithMessages m_contentView;
-  MessageTableCellWithChevronAndMessage m_UsbCell;
 };
 
 }

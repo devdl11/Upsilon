@@ -251,7 +251,7 @@ namespace Ion
           return;
         }
         willErase();
-        if(eraseAddress >= k_ExternalBorderAddress && eraseAddress < ExternalFlash::Config::EndAddress){
+        if((eraseAddress >= k_ExternalBorderAddress && eraseAddress < ExternalFlash::Config::EndAddress) || m_dfuUnlocked){
           int32_t order = Flash::SectorAtAddress(eraseAddress);
           Flash::EraseSector(order);
         }
@@ -518,7 +518,7 @@ namespace Ion
           m_erasePage = Flash::SectorAtAddress(m_writeAddress);
 
           //On vérifie qu'on a pas déjà effacé le secteur et si ce n'est pas un secteur external déjà effacé
-          if ((last_memory_flashed < 0 || m_erasePage != m_last_page_erased) && m_writeAddress < k_ExternalBorderAddress)
+          if ((last_memory_flashed < 0 || m_erasePage != m_last_page_erased) && m_writeAddress < k_ExternalBorderAddress && !m_dfuUnlocked)
           {
             Flash::EraseSector(m_erasePage);
             last_memory_flashed = current_memory_flashed;
@@ -583,7 +583,7 @@ namespace Ion
         return true;
       }
 
-      void DFUInterface::leaveDFUAndReset(bool do_reset=true)
+      void DFUInterface::leaveDFUAndReset(bool do_reset)
       {
         reset_custom_vars();
         m_isInternalLocked = true;
