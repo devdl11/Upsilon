@@ -29,30 +29,6 @@ namespace USB
       I18n::Message::DfuStatus1,
       I18n::Message::DfuStatusUnProtected};
 
-  static I18n::Message sUSBConnectedMessages2Protected[10] = {
-      I18n::Message::USBConnected,
-      I18n::Message::DfuStatus1,
-      I18n::Message::DfuStatusProtected,
-      I18n::Message::BlankMessage,
-      I18n::Message::DfuStatus2,
-      I18n::Message::DfuStatus3,
-      I18n::Message::DfuStatus4,
-      I18n::Message::BlankMessage,
-      I18n::Message::BlankMessage,
-      I18n::Message::BlankMessage};
-
-  static I18n::Message sUSBConnectedMessages2UnProtected[10] = {
-      I18n::Message::USBConnected,
-      I18n::Message::DfuStatus1,
-      I18n::Message::DfuStatusUnProtected,
-      I18n::Message::BlankMessage,
-      I18n::Message::DfuStatus2,
-      I18n::Message::DfuStatus3,
-      I18n::Message::DfuStatus4,
-      I18n::Message::BlankMessage,
-      I18n::Message::BlankMessage,
-      I18n::Message::BlankMessage};
-
   static KDColor sUSBConnectedFGColors[] = {
       Palette::PrimaryText,
       Palette::PrimaryText,
@@ -86,14 +62,14 @@ namespace USB
     {
       getMessageView()->update(sUSBConnectedMessagesUnProtected, sUSBConnectedFGColors, sUSBConnectedBGColors, 10);
     }
-    else if (step == 1 && GlobalPreferences::sharedGlobalPreferences()->dfuStatus())
-    {
-      getMessageView()->update(sUSBConnectedMessages2UnProtected, sUSBConnectedFGColors, sUSBConnectedBGColors, 10);
-    }
-    else if (step == 1 && !GlobalPreferences::sharedGlobalPreferences()->dfuStatus())
-    {
-      getMessageView()->update(sUSBConnectedMessages2Protected, sUSBConnectedFGColors, sUSBConnectedBGColors, 10);
-    }
+    // else if (step == 1 && GlobalPreferences::sharedGlobalPreferences()->dfuStatus())
+    // {
+    //   getMessageView()->update(sUSBConnectedMessages2UnProtected, sUSBConnectedFGColors, sUSBConnectedBGColors, 10);
+    // }
+    // else if (step == 1 && !GlobalPreferences::sharedGlobalPreferences()->dfuStatus())
+    // {
+    //   getMessageView()->update(sUSBConnectedMessages2Protected, sUSBConnectedFGColors, sUSBConnectedBGColors, 10);
+    // }
     already_init = true;
   }
 
