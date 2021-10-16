@@ -4,6 +4,7 @@
 #include "generic_sub_controller.h"
 #include "selectable_view_with_messages.h"
 #include "preferences_controller.h"
+#include "usb_protection_level_controller.h"
 
 namespace Settings {
 
@@ -27,6 +28,8 @@ private:
   static constexpr int k_maxSwitchCells = 1;
   // MessageTableCellWithBuffer m_cell[k_maxNumberOfCells];
   MessageTableCellWithSwitch m_switchCells[k_maxSwitchCells];
+  UsbProtectionLevelController m_usbprotectlevel;
+  MessageTableCellWithChevronAndMessage m_dfuLevel;
   SelectableViewWithMessages m_contentView;
 };
 

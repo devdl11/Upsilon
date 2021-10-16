@@ -81,6 +81,10 @@ namespace Ion
           // Do any needed action after the GetStatus request.
           if (m_state == State::dfuMANIFEST)
           {
+            if (m_dfuLevel == 1 && m_isFirstExternalFlash && !m_isInternalLocked)
+            {
+              return;
+            }
             /* If we leave the DFU and reset immediately, dfu-util outputs an error:
        * "File downloaded successfully
        *  dfu-util: Error during download get_status"
@@ -251,7 +255,8 @@ namespace Ion
           return;
         }
         willErase();
-        if((eraseAddress >= k_ExternalBorderAddress && eraseAddress < ExternalFlash::Config::EndAddress) || m_dfuUnlocked){
+        if ((eraseAddress >= k_ExternalBorderAddress && eraseAddress < ExternalFlash::Config::EndAddress) || m_dfuUnlocked)
+        {
           int32_t order = Flash::SectorAtAddress(eraseAddress);
           Flash::EraseSector(order);
         }
@@ -286,10 +291,18 @@ namespace Ion
         }
         else if (Flash::SectorAtAddress(m_writeAddress) >= 0)
         {
+          if (m_dfuLevel == 2)
+          {
+            m_largeBufferLength = 0;
+            m_state = State::dfuERROR;
+            m_status = Status::errTARGET;
+            return;
+          }
+
           int current_memory_flashed;
           if (m_writeAddress >= InternalFlash::Config::StartAddress && m_writeAddress <= InternalFlash::Config::EndAddress)
           {
-            if (m_isInternalLocked && !m_dfuUnlocked) // On vérifie si l'external a été flash
+            if (m_isInternalLocked && m_dfuLevel == 0 && !m_dfuUnlocked) // On vérifie si l'external a été flash
             {
               m_largeBufferLength = 0;
               m_state = State::dfuERROR;
@@ -298,7 +311,7 @@ namespace Ion
               return;
             }
             current_memory_flashed = 0;
-            
+
             //on écrit dans la mémoire interne
             if (m_isFirstInternalFlash && !m_dfuUnlocked)
             {
@@ -315,13 +328,17 @@ namespace Ion
               {
                 m_largeBufferLength = 0;
                 m_state = State::dfuERROR;
-              m_status = Status::errTARGET;
+                m_status = Status::errTARGET;
                 //leaveDFUAndReset(); On ne leave plus sinon on fait crash la calc si il n'y a que la partie ext.
                 return;
               }
               else
               {
                 m_isFirstInternalFlash = false;
+              }
+              if (m_dfuLevel == 1)
+              {
+                m_isInternalLocked = false;
               }
             }
           }
@@ -331,182 +348,194 @@ namespace Ion
             // Nous écrivons la partie external os
             if (m_writeAddress < k_ExternalBorderAddress && m_isFirstExternalFlash && !m_dfuUnlocked) // On vérifie si on installe des apps ext
             {
-              // Partie moche du code parce que je n'arrivais pas à compil avec 3 boucles for
-              int adress_magik = magik_ext_adrs[0];
-              m_temp_is_valid = external_magik[0] == m_largeBuffer[adress_magik];
-              m_largeBuffer[adress_magik] = 0xff;
-
-              if (!m_temp_is_valid)
+              if (m_dfuLevel == 1 && m_isInternalLocked)
               {
                 m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
+                m_state = State::dfuERROR;
+                m_status = Status::errTARGET;
                 return;
               }
-
-              m_temp_is_valid = external_magik[1] == m_largeBuffer[adress_magik + 1];
-              m_largeBuffer[adress_magik + 1] = 0xff;
-
-              if (!m_temp_is_valid)
+              if (m_dfuLevel == 0)
               {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                // Partie moche du code parce que je n'arrivais pas à compil avec 3 boucles for
+                int adress_magik = magik_ext_adrs[0];
+                m_temp_is_valid = external_magik[0] == m_largeBuffer[adress_magik];
+                m_largeBuffer[adress_magik] = 0xff;
 
-              m_temp_is_valid = external_magik[2] == m_largeBuffer[adress_magik + 2];
-              m_largeBuffer[adress_magik + 2] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                m_temp_is_valid = external_magik[1] == m_largeBuffer[adress_magik + 1];
+                m_largeBuffer[adress_magik + 1] = 0xff;
 
-              m_temp_is_valid = external_magik[3] == m_largeBuffer[adress_magik + 3];
-              m_largeBuffer[adress_magik + 3] = 0xff;
-              
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              adress_magik = magik_ext_adrs[1];
+                m_temp_is_valid = external_magik[2] == m_largeBuffer[adress_magik + 2];
+                m_largeBuffer[adress_magik + 2] = 0xff;
 
-              m_temp_is_valid = external_magik[5] == m_largeBuffer[adress_magik];
-              m_largeBuffer[adress_magik] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                m_temp_is_valid = external_magik[3] == m_largeBuffer[adress_magik + 3];
+                m_largeBuffer[adress_magik + 3] = 0xff;
 
-              m_temp_is_valid = external_magik[6] == m_largeBuffer[adress_magik + 1];
-              m_largeBuffer[adress_magik + 1] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                adress_magik = magik_ext_adrs[1];
 
-              m_temp_is_valid = external_magik[7] == m_largeBuffer[adress_magik + 2];
-              m_largeBuffer[adress_magik + 2] = 0xff;
+                m_temp_is_valid = external_magik[5] == m_largeBuffer[adress_magik];
+                m_largeBuffer[adress_magik] = 0xff;
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              m_temp_is_valid = external_magik[8] == m_largeBuffer[adress_magik + 3];
-              m_largeBuffer[adress_magik + 3] = 0xff;
+                m_temp_is_valid = external_magik[6] == m_largeBuffer[adress_magik + 1];
+                m_largeBuffer[adress_magik + 1] = 0xff;
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              adress_magik = magik_ext_adrs[2];
-              m_temp_is_valid = true;
+                m_temp_is_valid = external_magik[7] == m_largeBuffer[adress_magik + 2];
+                m_largeBuffer[adress_magik + 2] = 0xff;
 
-              m_temp_is_valid = external_magik[0] == m_largeBuffer[adress_magik];
-              m_largeBuffer[adress_magik] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                m_temp_is_valid = external_magik[8] == m_largeBuffer[adress_magik + 3];
+                m_largeBuffer[adress_magik + 3] = 0xff;
 
-              m_temp_is_valid = external_magik[1] == m_largeBuffer[adress_magik + 1];
-              m_largeBuffer[adress_magik + 1] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                adress_magik = magik_ext_adrs[2];
+                m_temp_is_valid = true;
 
-              m_temp_is_valid = external_magik[2] == m_largeBuffer[adress_magik + 2];
-              m_largeBuffer[adress_magik + 2] = 0xff;
+                m_temp_is_valid = external_magik[0] == m_largeBuffer[adress_magik];
+                m_largeBuffer[adress_magik] = 0xff;
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              m_temp_is_valid = external_magik[3] == m_largeBuffer[adress_magik + 3];
-              m_largeBuffer[adress_magik + 3] = 0xff;
+                m_temp_is_valid = external_magik[1] == m_largeBuffer[adress_magik + 1];
+                m_largeBuffer[adress_magik + 1] = 0xff;
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
-              
-              m_temp_is_valid = external_magik[4] == m_largeBuffer[adress_magik + 4];
-              m_largeBuffer[adress_magik + 4] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
-              m_temp_is_valid = external_magik[5] == m_largeBuffer[adress_magik + 5];
-              m_largeBuffer[adress_magik + 5] = 0xff;
+                m_temp_is_valid = external_magik[2] == m_largeBuffer[adress_magik + 2];
+                m_largeBuffer[adress_magik + 2] = 0xff;
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
-              m_temp_is_valid = external_magik[6] == m_largeBuffer[adress_magik + 6];
-              m_largeBuffer[adress_magik + 6] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
-              m_temp_is_valid = external_magik[7] == m_largeBuffer[adress_magik + 7];
-              m_largeBuffer[adress_magik + 7] = 0xff;
+                m_temp_is_valid = external_magik[3] == m_largeBuffer[adress_magik + 3];
+                m_largeBuffer[adress_magik + 3] = 0xff;
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
-              m_temp_is_valid = external_magik[8] == m_largeBuffer[adress_magik + 8];
-              m_largeBuffer[adress_magik + 8] = 0xff;
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
 
-              if (!m_temp_is_valid)
-              {
-                m_largeBufferLength = 0;
-                leaveDFUAndReset(false);
-                return;
-              }
-              else
-              {
+                m_temp_is_valid = external_magik[4] == m_largeBuffer[adress_magik + 4];
+                m_largeBuffer[adress_magik + 4] = 0xff;
+
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
+                m_temp_is_valid = external_magik[5] == m_largeBuffer[adress_magik + 5];
+                m_largeBuffer[adress_magik + 5] = 0xff;
+
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
+                m_temp_is_valid = external_magik[6] == m_largeBuffer[adress_magik + 6];
+                m_largeBuffer[adress_magik + 6] = 0xff;
+
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
+                m_temp_is_valid = external_magik[7] == m_largeBuffer[adress_magik + 7];
+                m_largeBuffer[adress_magik + 7] = 0xff;
+
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
+                m_temp_is_valid = external_magik[8] == m_largeBuffer[adress_magik + 8];
+                m_largeBuffer[adress_magik + 8] = 0xff;
+
+                if (!m_temp_is_valid)
+                {
+                  m_largeBufferLength = 0;
+                  leaveDFUAndReset(false);
+                  return;
+                }
+                else
+                {
+                  m_isFirstExternalFlash = false;
+                  m_isInternalLocked = false;
+                }
+              }else{
                 m_isFirstExternalFlash = false;
-                m_isInternalLocked = false;
               }
             }
           }

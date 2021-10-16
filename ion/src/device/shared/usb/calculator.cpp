@@ -7,7 +7,7 @@ namespace Ion {
 namespace Device {
 namespace USB {
 
-void Calculator::PollAndReset(bool exitWithKeyboard, bool unlock) {
+void Calculator::PollAndReset(bool exitWithKeyboard, bool unlock, int level) {
   char serialNumber[Ion::Device::SerialNumber::Length+1];
   Ion::Device::SerialNumber::copy(serialNumber);
   Calculator c(serialNumber);
@@ -20,6 +20,7 @@ void Calculator::PollAndReset(bool exitWithKeyboard, bool unlock) {
   uint8_t exitKeyColumn = Ion::Device::Keyboard::columnForKey(exitKey);
 
   Ion::Device::Keyboard::activateRow(exitKeyRow);
+  c.m_dfuInterface.setLevel(level);
   if(unlock){
     c.m_dfuInterface.unlockDfu();
   }

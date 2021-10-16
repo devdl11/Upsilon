@@ -41,7 +41,8 @@ namespace Ion
                                                                                            m_isFirstExternalFlash(true),
                                                                                            last_memory_flashed(-1),
                                                                                            m_last_page_erased(-1),
-                                                                                           m_dfuUnlocked(false)
+                                                                                           m_dfuUnlocked(false),
+                                                                                           m_dfuLevel(0)
         {
         }
         uint32_t addressPointer() const { return m_addressPointer; }
@@ -49,6 +50,7 @@ namespace Ion
         void wholeDataSentCallback(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength) override;
         bool isErasingAndWriting() const { return m_isErasingAndWriting; }
         void unlockDfu() {m_dfuUnlocked = true;};
+        void setLevel(int lvl) {m_dfuLevel = lvl; }
 
       protected:
         void setActiveInterfaceAlternative(uint8_t interfaceAlternativeIndex) override
@@ -212,6 +214,7 @@ namespace Ion
         int last_memory_flashed; // -1: aucune; 0: internal; 1: external
         int m_last_page_erased; // -1 par défaut
         bool m_dfuUnlocked;
+        int m_dfuLevel;
       };
 
     }

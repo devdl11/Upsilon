@@ -2,6 +2,8 @@
 #include "../../apps_container.h"
 #include <apps/i18n.h>
 #include <assert.h>
+#include <apps/settings/main_controller.h>
+#include <ion/storage.h>
 #include <cmath>
 #include <poincare/preferences.h>
 #include <apps/i18n.h>
@@ -14,6 +16,8 @@ namespace Settings
 {
 
   UsbInfoController::UsbInfoController(Responder *parentResponder) : GenericSubController(parentResponder),
+                                                                     m_usbprotectlevel(this),
+                                                                     m_dfuLevel(KDFont::LargeFont, KDFont::SmallFont),
                                                                      m_contentView(&m_selectableTableView)
   {
     for (int i = 0; i < k_maxSwitchCells; i++)
@@ -24,6 +28,7 @@ namespace Settings
       // m_cell[i].setAccessoryFont(KDFont::SmallFont);
       // m_cell[i].setAccessoryTextColor(Palette::SecondaryText);
     }
+
   }
 
   bool UsbInfoController::handleEvent(Ion::Events::Event event)
@@ -58,6 +63,15 @@ namespace Settings
       return true;
     }
 
+    if((Ion::Events::OK == event || Ion::Events::EXE == event) && selectedRow() == 1){
+      GenericSubController * subController = &m_usbprotectlevel;
+      subController->setMessageTreeModel(m_messageTreeModel->childAtIndex(1));
+      StackViewController * stack = stackController();
+      m_lastSelect = selectedRow();
+      stack->push(subController);
+      return true;
+    }
+
     return GenericSubController::handleEvent(event);
   }
 
@@ -68,7 +82,7 @@ namespace Settings
       assert(index >= 0 && index < k_maxSwitchCells);
       return &m_switchCells[index];
     }
-    return nullptr;
+    return &m_dfuLevel;
   }
 
   int UsbInfoController::reusableCellCount(int type)
@@ -77,7 +91,7 @@ namespace Settings
     if (type == 2){
       return k_maxSwitchCells;
     }
-    return 0;
+    return 1;
   }
 
   void UsbInfoController::willDisplayCellForIndex(HighlightCell *celll, int index)
@@ -88,6 +102,18 @@ namespace Settings
       MessageTableCellWithSwitch *myCell = (MessageTableCellWithSwitch *)celll;
       SwitchView * mySwitch = (SwitchView *)myCell->accessoryView();
       mySwitch->setState(!GlobalPreferences::sharedGlobalPreferences()->dfuStatus());
+    }else if(index == 1){
+      MessageTableCellWithChevronAndMessage *mcell = (MessageTableCellWithChevronAndMessage *)celll;
+      int currentLevel = GlobalPreferences::sharedGlobalPreferences()->getDfuLevel();
+      if(currentLevel == 0){
+        mcell->setSubtitle(I18n::Message::USBDefaultLevel);
+      }else if(currentLevel == 1){
+        mcell->setSubtitle(I18n::Message::USBLowLevel);
+      }else if(currentLevel == 2){
+        mcell->setSubtitle(I18n::Message::USBParanoidLevel);
+      }else{
+        mcell->setSubtitle(I18n::Message::USBMegaParanoidLevel);
+      }
     }
 
   }

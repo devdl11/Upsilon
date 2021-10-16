@@ -4,6 +4,9 @@ ifdef GIT
   PATCH_LEVEL = $(shell git rev-parse HEAD | head -c 7)
 endif
 
+# Ici on fait genre qu'on est à jour
+PATCH_LEVEL = 971947c
+
 SFLAGS += -Iion/include -DKD_CONFIG_H=1
 
 ifndef ION_KEYBOARD_LAYOUT
