@@ -6,6 +6,11 @@
 #include "../drivers/rtc.h"
 #include "../drivers/reset.h"
 #include "../drivers/timing.h"
+#include <drivers/led.h>
+#include <kandinsky.h>
+#include <drivers/cache.h>
+#include "../drivers/timing.h"
+
 
 typedef void (*cxx_constructor)();
 
@@ -19,15 +24,6 @@ extern "C" {
   extern cxx_constructor _init_array_end;
 }
 
-void __attribute__((noinline)) abort() {
-#ifdef NDEBUG
-  Ion::Device::Reset::core();
-#else
-  while (1) {
-  }
-#endif
-}
-
 /* In order to ensure that this method is execute from the external flash, we
  * forbid inlining it.*/
 
@@ -38,7 +34,6 @@ static void __attribute__((noinline)) external_flash_start() {
    * after the Power-On Self-Test if there is one or before switching to the
    * home app otherwise. */
   Ion::Device::Board::initPeripherals(false);
-
   return ion_main(0, nullptr);
 }
 
@@ -62,6 +57,131 @@ static void __attribute__((noinline)) external_flash_start() {
 
 static void __attribute__((noinline)) jump_to_external_flash() {
   external_flash_start();
+}
+
+
+void __attribute__((noinline)) abort() {
+  Ion::Device::Board::shutdownPeripherals(true);
+  Ion::Device::Board::initPeripherals(false);
+  Ion::Timing::msleep(100);
+  Ion::Backlight::init();
+  Ion::LED::setColor(KDColorRed);
+  KDRect screen = KDRect(0,0,Ion::Display::Width,Ion::Display::Height);
+  Ion::Display::pushRectUniform(KDRect(0,0,Ion::Display::Width,Ion::Display::Height), KDColor::RGB24(0xffffff));
+  KDContext * ctx = KDIonContext::sharedContext();
+  ctx->setOrigin(KDPointZero);
+  ctx->setClippingRect(screen);
+  ctx->drawString("UPSILON CRASH", KDPoint(90, 10), KDFont::LargeFont, KDColorRed, KDColor::RGB24(0xffffff));
+  ctx->drawString("An error occurred", KDPoint(10, 30), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("If you have some important data, please", KDPoint(10, 45), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("use getomega.dev/ide to backup them.", KDPoint(10, 60), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("YOU WILL LOSE ALL YOUR DATA", KDPoint(10, 85), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ You can try to reboot by presssing the", KDPoint(10, 110), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("reset button at the back of the calculator", KDPoint(10, 125), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ If Upsilon keeps crashing, you can connect", KDPoint(10, 140), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("the calculator to a computer or a phone", KDPoint(10, 160), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("and try to reinstall Upsilon", KDPoint(10, 175), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("HARDFAULT", KDPoint(220, 200), KDFont::SmallFont, KDColorRed, KDColor::RGB24(0xffffff));
+  Ion::Timing::msleep(100);
+  while(true){
+    Ion::USB::enable();
+    while (!Ion::USB::isEnumerated()) {
+    }
+    Ion::USB::DFU(false, false, 0);
+  }
+  
+}
+
+void  __attribute__((noinline)) nmi_abort(){
+  Ion::Device::Board::shutdownPeripherals(true);
+  Ion::Device::Board::initPeripherals(false);
+  Ion::Timing::msleep(100);
+  Ion::Backlight::init();
+  Ion::LED::setColor(KDColorRed);
+  KDRect screen = KDRect(0,0,Ion::Display::Width,Ion::Display::Height);
+  Ion::Display::pushRectUniform(KDRect(0,0,Ion::Display::Width,Ion::Display::Height), KDColor::RGB24(0xffffff));
+  KDContext * ctx = KDIonContext::sharedContext();
+  ctx->setOrigin(KDPointZero);
+  ctx->setClippingRect(screen);
+  ctx->drawString("UPSILON CRASH", KDPoint(90, 10), KDFont::LargeFont, KDColorRed, KDColor::RGB24(0xffffff));
+  ctx->drawString("An error occurred", KDPoint(10, 30), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("If you have some important data, please", KDPoint(10, 45), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("use getomega.dev/ide to backup them.", KDPoint(10, 60), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("YOU WILL LOSE ALL YOUR DATA", KDPoint(10, 85), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ You can try to reboot by presssing the", KDPoint(10, 110), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("reset button at the back of the calculator", KDPoint(10, 125), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ If Upsilon keeps crashing, you can connect", KDPoint(10, 140), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("the calculator to a computer or a phone", KDPoint(10, 160), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("and try to reinstall Upsilon", KDPoint(10, 175), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("NMIFAULT", KDPoint(220, 200), KDFont::SmallFont, KDColorRed, KDColor::RGB24(0xffffff));
+  Ion::Timing::msleep(100);
+  while(true){
+    Ion::USB::enable();
+    while (!Ion::USB::isEnumerated()) {
+    }
+    Ion::USB::DFU(false, false, 0);
+  }
+}
+
+void  __attribute__((noinline)) bf_abort(){
+  Ion::Device::Board::shutdownPeripherals(true);
+  Ion::Device::Board::initPeripherals(false);
+  Ion::Timing::msleep(100);
+  Ion::Backlight::init();
+  Ion::LED::setColor(KDColorRed);
+  KDRect screen = KDRect(0,0,Ion::Display::Width,Ion::Display::Height);
+  Ion::Display::pushRectUniform(KDRect(0,0,Ion::Display::Width,Ion::Display::Height), KDColor::RGB24(0xffffff));
+  KDContext * ctx = KDIonContext::sharedContext();
+  ctx->setOrigin(KDPointZero);
+  ctx->setClippingRect(screen);
+  ctx->drawString("UPSILON CRASH", KDPoint(90, 10), KDFont::LargeFont, KDColorRed, KDColor::RGB24(0xffffff));
+  ctx->drawString("An error occurred", KDPoint(10, 30), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("If you have some important data, please", KDPoint(10, 45), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("use getomega.dev/ide to backup them.", KDPoint(10, 60), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("YOU WILL LOSE ALL YOUR DATA", KDPoint(10, 85), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ You can try to reboot by presssing the", KDPoint(10, 110), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("reset button at the back of the calculator", KDPoint(10, 125), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ If Upsilon keeps crashing, you can connect", KDPoint(10, 140), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("the calculator to a computer or a phone", KDPoint(10, 160), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("and try to reinstall Upsilon", KDPoint(10, 175), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("BUSFAULT", KDPoint(220, 200), KDFont::SmallFont, KDColorRed, KDColor::RGB24(0xffffff));
+  Ion::Timing::msleep(100);
+  while(true){
+    Ion::USB::enable();
+    while (!Ion::USB::isEnumerated()) {
+    }
+    Ion::USB::DFU(false, false, 0);
+  }
+}
+void  __attribute__((noinline)) uf_abort(){
+  Ion::Device::Board::shutdownPeripherals(true);
+  Ion::Device::Board::initPeripherals(false);
+  Ion::Timing::msleep(100);
+  Ion::Backlight::init();
+  Ion::LED::setColor(KDColorRed);
+  KDRect screen = KDRect(0,0,Ion::Display::Width,Ion::Display::Height);
+  Ion::Display::pushRectUniform(KDRect(0,0,Ion::Display::Width,Ion::Display::Height), KDColor::RGB24(0xffffff));
+  KDContext * ctx = KDIonContext::sharedContext();
+  ctx->setOrigin(KDPointZero);
+  ctx->setClippingRect(screen);
+  ctx->drawString("UPSILON CRASH", KDPoint(90, 10), KDFont::LargeFont, KDColorRed, KDColor::RGB24(0xffffff));
+  ctx->drawString("An error occurred", KDPoint(10, 30), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("If you have some important data, please", KDPoint(10, 45), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("use getomega.dev/ide to backup them.", KDPoint(10, 60), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("YOU WILL LOSE ALL YOUR DATA", KDPoint(10, 85), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ You can try to reboot by presssing the", KDPoint(10, 110), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("reset button at the back of the calculator", KDPoint(10, 125), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("→ If Upsilon keeps crashing, you can connect", KDPoint(10, 140), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("the calculator to a computer or a phone", KDPoint(10, 160), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("and try to reinstall Upsilon", KDPoint(10, 175), KDFont::SmallFont, KDColorBlack, KDColor::RGB24(0xffffff));
+  ctx->drawString("USAGEFAULT", KDPoint(220, 200), KDFont::SmallFont, KDColorRed, KDColor::RGB24(0xffffff));
+  Ion::Timing::msleep(100);
+  while(true){
+    Ion::USB::enable();
+    while (!Ion::USB::isEnumerated()) {
+    }
+    Ion::USB::DFU(false, false, 0);
+  }
 }
 
 /* When 'start' is executed, the external flash is supposed to be shutdown. We
@@ -110,9 +230,10 @@ void __attribute__((noinline)) start() {
 #endif
 
   Ion::Device::Board::init();
-
+  
   /* At this point, we initialized clocks and the external flash but no other
    * peripherals. */
+  
 
   jump_to_external_flash();
 

@@ -79,22 +79,22 @@ namespace Settings
         if (childLabel == I18n::Message::USBLowLevel && currentLevel == 1)
         {
             // messageComp->setTextColor(Palette::Green);
-            messageComp->setAccessoryText("✔");
+            messageComp->setAccessoryText("√");
         }
         else if (childLabel == I18n::Message::USBDefaultLevel && currentLevel == 0)
         {
             // messageComp->setTextColor(Palette::Green);
-            messageComp->setAccessoryText("✔");
+            messageComp->setAccessoryText("√");
         }
         else if (childLabel == I18n::Message::USBParanoidLevel && currentLevel == 2)
         {
             // messageComp->setTextColor(Palette::Green);
-            messageComp->setAccessoryText("✔");
+            messageComp->setAccessoryText("√");
         }
         else if (childLabel == I18n::Message::USBMegaParanoidLevel && currentLevel == 3)
         {
             // messageComp->setTextColor(Palette::Green);
-            messageComp->setAccessoryText("✔");
+            messageComp->setAccessoryText("√");
         }
     }
 

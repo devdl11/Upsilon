@@ -106,13 +106,17 @@ namespace Settings
       MessageTableCellWithChevronAndMessage *mcell = (MessageTableCellWithChevronAndMessage *)celll;
       int currentLevel = GlobalPreferences::sharedGlobalPreferences()->getDfuLevel();
       if(currentLevel == 0){
-        mcell->setSubtitle(I18n::Message::USBDefaultLevel);
+        // mcell->setSubtitle(I18n::Message::USBDefaultLevel);
+        mcell->setSubtitle(I18n::Message::USBDefaultLevelDesc);
       }else if(currentLevel == 1){
-        mcell->setSubtitle(I18n::Message::USBLowLevel);
+        // mcell->setSubtitle(I18n::Message::USBLowLevel);
+        mcell->setSubtitle(I18n::Message::USBLowLevelDesc);
       }else if(currentLevel == 2){
-        mcell->setSubtitle(I18n::Message::USBParanoidLevel);
+        // mcell->setSubtitle(I18n::Message::USBParanoidLevel);
+        mcell->setSubtitle(I18n::Message::USBParanoidLevelDesc);
       }else{
-        mcell->setSubtitle(I18n::Message::USBMegaParanoidLevel);
+        // mcell->setSubtitle(I18n::Message::USBMegaParanoidLevel);
+        mcell->setSubtitle(I18n::Message::USBMegaParanoidLevelDesc);
       }
     }
 
