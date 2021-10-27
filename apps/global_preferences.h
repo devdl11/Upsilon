@@ -37,6 +37,8 @@ public:
   void dfuResetStep() {m_dfu_step = 0;}
   int getDfuLevel() const {return m_dfu_protectLevel;}
   void setDfuLevel(int level) {m_dfu_protectLevel = level;}
+  bool autocomplete() const { return m_autoComplete; }
+  void setAutocomplete(bool autocomple) { m_autoComplete = autocomple; }
   int brightnessLevel() const { return m_brightnessLevel; }
   void setBrightnessLevel(int brightnessLevel);
   const KDFont * font() const { return m_font; }
@@ -52,9 +54,7 @@ private:
     m_examMode(ExamMode::Unknown),
     m_tempExamMode(ExamMode::Standard),
     m_showPopUp(true),
-    m_dfu_unlocked(false),
-    m_dfu_step(0),
-    m_dfu_protectLevel(0),
+    m_autoComplete(true),
     m_brightnessLevel(Ion::Backlight::MaxBrightness),
     m_font(KDFont::LargeFont) {}
   I18n::Language m_language;
@@ -67,6 +67,7 @@ private:
   bool m_dfu_unlocked;
   int m_dfu_step;
   int m_dfu_protectLevel; // 0: default; 1: OmegaMode; 2: Paranoid; 3: Paranoid++
+  bool m_autoComplete;
   int m_brightnessLevel;
   const KDFont * m_font;
 };
