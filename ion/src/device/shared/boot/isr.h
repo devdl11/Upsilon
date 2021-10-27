@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+void bf_abort();
+void uf_abort();
+void nmi_abort();
 void start();
 void abort();
 void isr_systick();
