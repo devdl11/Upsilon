@@ -30,13 +30,15 @@ public:
   void setTempExamMode(ExamMode examMode);
   bool showPopUp() const { return m_showPopUp; }
   void setShowPopUp(bool showPopUp) { m_showPopUp = showPopUp; }
-  bool dfuStatus() const {return m_dfu_unlocked;}
-  void setDfuStatus(bool status) {m_dfu_unlocked=status;}
-  int dfuCurrentStep() const {return m_dfu_step;}
-  void dfuIncreaseStep() {m_dfu_step++;}
-  void dfuResetStep() {m_dfu_step = 0;}
-  int getDfuLevel() const {return m_dfu_protectLevel;}
-  void setDfuLevel(int level) {m_dfu_protectLevel = level;}
+  bool dfuStatus() const {return m_dfuUnlocked;}
+  void setDfuStatus(bool status) {m_dfuUnlocked=status;}
+  int dfuCurrentStep() const {return m_dfuStep;}
+  void dfuIncreaseStep() {m_dfuStep++;}
+  void dfuResetStep() {m_dfuStep = 0;}
+  int getDfuLevel() const {return m_dfuProtectLevel;}
+  void setDfuLevel(int level) {m_dfuProtectLevel = level;}
+  bool showDfuDeacAlert() const {return m_showDeacAlert;}
+  void setDfuDeacAlert(bool value)  {m_showDeacAlert = value;}
   bool autocomplete() const { return m_autoComplete; }
   void setAutocomplete(bool autocomple) { m_autoComplete = autocomple; }
   int brightnessLevel() const { return m_brightnessLevel; }
@@ -54,6 +56,10 @@ private:
     m_examMode(ExamMode::Unknown),
     m_tempExamMode(ExamMode::Standard),
     m_showPopUp(true),
+    m_dfuUnlocked(false),
+    m_dfuStep(0),
+    m_dfuProtectLevel(0),
+    m_showDeacAlert(true),
     m_autoComplete(true),
     m_brightnessLevel(Ion::Backlight::MaxBrightness),
     m_font(KDFont::LargeFont) {}
@@ -64,9 +70,10 @@ private:
   mutable ExamMode m_examMode;
   mutable ExamMode m_tempExamMode;
   bool m_showPopUp;
-  bool m_dfu_unlocked;
-  int m_dfu_step;
-  int m_dfu_protectLevel; // 0: default; 1: OmegaMode; 2: Paranoid; 3: Paranoid++
+  bool m_dfuUnlocked;
+  int m_dfuStep;
+  int m_dfuProtectLevel; // 0: default; 1: OmegaMode; 2: Paranoid; 3: Paranoid++
+  bool m_showDeacAlert;
   bool m_autoComplete;
   int m_brightnessLevel;
   const KDFont * m_font;

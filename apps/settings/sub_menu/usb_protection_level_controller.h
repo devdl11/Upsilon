@@ -15,7 +15,7 @@ public:
   void willDisplayCellForIndex(HighlightCell * cell, int index) override;
   int typeAtLocation(int i, int j) override;
 private:
-  static constexpr int k_maxNumberOfCells = 4;
+  static constexpr int k_maxNumberOfCells = 3;
   MessageTableCellWithBuffer m_cell[k_maxNumberOfCells];
 };
 
