@@ -32,15 +32,15 @@ namespace Ion
                                                                                            m_largeBuffer{0},
                                                                                            m_largeBufferLength(0),
                                                                                            m_writeAddress(0),
-                                                                                           eraseAddress(0),
+                                                                                           m_eraseAddress(0),
                                                                                            m_bInterfaceAlternateSetting(bInterfaceAlternateSetting),
                                                                                            m_isErasingAndWriting(false),
                                                                                            m_isFirstInternalFlash(true),
                                                                                            m_temp_is_valid(false),
                                                                                            m_isInternalLocked(true),
                                                                                            m_isFirstExternalFlash(true),
-                                                                                           last_memory_flashed(-1),
-                                                                                           m_last_page_erased(-1),
+                                                                                           m_last_memoryFlashed(-1),
+                                                                                           m_lastPageErased(-1),
                                                                                            m_dfuUnlocked(false),
                                                                                            m_dfuLevel(0)
         {
@@ -193,7 +193,7 @@ namespace Ion
    * software download, the calculator resets, which unlocks the "exit on
    * pressing back". */
         void willErase() { m_isErasingAndWriting = true; }
-        void reset_custom_vars() {m_temp_is_valid = true; last_memory_flashed = -1; m_last_page_erased = -1;}
+        void reset_custom_vars() {m_temp_is_valid = true; m_last_memoryFlashed = -1; m_lastPageErased = -1;}
 
         Device *m_device;
         Status m_status;
@@ -204,15 +204,15 @@ namespace Ion
         uint8_t m_largeBuffer[Endpoint0::MaxTransferSize];
         uint16_t m_largeBufferLength;
         uint32_t m_writeAddress;
-        uint32_t eraseAddress;
+        uint32_t m_eraseAddress;
         uint8_t m_bInterfaceAlternateSetting;
         bool m_isErasingAndWriting;
         bool m_isFirstInternalFlash;
         bool m_temp_is_valid;
         bool m_isInternalLocked;
         bool m_isFirstExternalFlash;
-        int last_memory_flashed; // -1: aucune; 0: internal; 1: external
-        int m_last_page_erased; // -1 par défaut
+        int m_last_memoryFlashed; // -1: aucune; 0: internal; 1: external
+        int m_lastPageErased; // -1 par défaut
         bool m_dfuUnlocked;
         int m_dfuLevel;
       };
