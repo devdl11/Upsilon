@@ -25,6 +25,14 @@ void GlobalPreferences::setExamMode(ExamMode mode) {
     return;
   }
   assert(mode != ExamMode::Unknown);
+
+  if (currentMode == ExamMode::Off) {
+    GlobalPreferences::sharedGlobalPreferences()->setExamStatus(true);
+  }else if (mode == ExamMode::Off && GlobalPreferences::sharedGlobalPreferences()->getExamStatus()) {
+    Ion::Storage::sharedStorage()->DeactivateQuarantine();
+    GlobalPreferences::sharedGlobalPreferences()->setExamStatus(false);
+  }
+
   int8_t deltaMode = (int8_t)mode - (int8_t)currentMode;
   deltaMode = deltaMode < 0 ? deltaMode + 4 : deltaMode;
   assert(deltaMode > 0);

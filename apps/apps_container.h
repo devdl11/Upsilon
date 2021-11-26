@@ -32,7 +32,7 @@ public:
   App::Snapshot * hardwareTestAppSnapshot();
   App::Snapshot * onBoardingAppSnapshot();
   App::Snapshot * usbConnectedAppSnapshot();
-  void reset();
+  void reset(GlobalPreferences::ExamMode mode);
   Poincare::Context * globalContext();
   MathToolbox * mathToolbox();
   MathVariableBoxController * variableBoxController();

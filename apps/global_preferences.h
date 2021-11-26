@@ -34,6 +34,8 @@ public:
   void setAutocomplete(bool autocomple) { m_autoComplete = autocomple; }
   int brightnessLevel() const { return m_brightnessLevel; }
   void setBrightnessLevel(int brightnessLevel);
+  void setExamStatus(bool status) { m_examStatus = status; }
+  bool getExamStatus() const { return m_examStatus; }
   const KDFont * font() const { return m_font; }
   void setFont(const KDFont * font) { m_font = font; }
   constexpr static int NumberOfBrightnessStates = 15;
@@ -48,6 +50,7 @@ private:
     m_showPopUp(true),
     m_autoComplete(true),
     m_brightnessLevel(Ion::Backlight::MaxBrightness),
+    m_examStatus(false),
     m_font(KDFont::LargeFont) {}
   I18n::Language m_language;
   I18n::Country m_country;
@@ -58,6 +61,7 @@ private:
   bool m_showPopUp;
   bool m_autoComplete;
   int m_brightnessLevel;
+  bool m_examStatus;
   const KDFont * m_font;
 };
 

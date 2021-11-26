@@ -208,7 +208,7 @@ void ExpressionModelListController::addEmptyModel() {
   if (error == Ion::Storage::Record::ErrorStatus::NotEnoughSpaceAvailable) {
     return;
   }
-  assert(error == Ion::Storage::Record::ErrorStatus::None);
+      assert(error == Ion::Storage::Record::ErrorStatus::None);
   didChangeModelsList();
   selectableTableView()->reloadData();
   editExpression(Ion::Events::OK);

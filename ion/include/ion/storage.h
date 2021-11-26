@@ -27,6 +27,7 @@ public:
   static constexpr char expExtension[] = "exp";
   static constexpr char funcExtension[] = "func";
   static constexpr char seqExtension[] = "seq";
+  static constexpr char examPrefix[] = "exam";
 
   class Record {
     /* A Record is identified by the CRC32 on its fullName because:
@@ -121,11 +122,17 @@ public:
   void destroyRecordsWithExtension(const char * extension);
 
   // Useful
-  static bool FullNameCompliant(const char * name);
+  static bool FullNameCompliant(const char * name, bool withoutExtension = false);
+  int getRecordIndex(Record r);
+  static bool strstr(const char * first, const char * second);
   
   // User by Python OS module
   int numberOfRecords();
   Record recordAtIndex(int index);
+
+  // ExamMode
+  void ActivateQuarantine();
+  void DeactivateQuarantine();
 
 private:
   constexpr static uint32_t Magic = 0xEE0BDDBA;
@@ -186,6 +193,9 @@ private:
   StorageDelegate * m_delegate;
   mutable Record m_lastRecordRetrieved;
   mutable char * m_lastRecordRetrievedPointer;
+  bool m_quarantine;
+  int m_barrierIndex;
+  int m_examNumber;
 };
 
 /* Some apps memoize records and need to be notified when a record might have

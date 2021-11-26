@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include <new>
+#include <stdlib.h>
 #if ION_STORAGE_LOG
 #include<iostream>
 #endif
@@ -26,6 +27,7 @@ constexpr char Storage::expExtension[];
 constexpr char Storage::funcExtension[];
 constexpr char Storage::seqExtension[];
 constexpr char Storage::eqExtension[];
+constexpr char Storage::examPrefix[];
 
 Storage * Storage::sharedStorage() {
   static Storage * storage = new (staticStorageArea) Storage();
@@ -96,6 +98,66 @@ void Storage::log() {
 }
 #endif
 
+void Storage::ActivateQuarantine() {
+  m_quarantine = true;
+  m_barrierIndex = numberOfRecords() - 1;
+  /* TODO maybe do: Reserve some amount of availableSize for Exam and delete
+   * some records if needed*/
+}
+
+void Storage::DeactivateQuarantine() {
+  assert(m_quarantine);
+  int amountOfNewRecords = numberOfRecords() - m_barrierIndex + 1;
+  m_quarantine = false;
+  m_barrierIndex = -1;
+}
+
+bool Storage::strstr(const char * first, const char * second) {
+  size_t fSize = strlen(first);
+  size_t sSize = strlen(second);
+  if (fSize == sSize) {
+    return strcmp(first, second) == 0;
+  } 
+  if (sSize > fSize) {
+    const char * buf = first;
+    first = second;
+    second = buf;
+    fSize = strlen(first);
+    sSize = strlen(second);
+  }
+  bool result = false;
+  int index = 0;
+  for (int i = 0; (size_t)i < fSize; i++) {
+    if (first[i] == second[index]) {
+      index++;
+      result = (size_t)index >= sSize;
+    } else if (fSize - 1 - (size_t)i < sSize - 1 - (size_t)index) {
+      break;
+    } else {
+      index = 0;
+    }
+    if (result) break;
+  }
+  return result;
+}
+
+int Storage::getRecordIndex(Record r) {
+  if (!hasRecord(r)) {
+    return -1;
+  }
+
+  int index = -1;
+  for (char * p : *this) {
+    const char * name = fullNameOfRecordStarting(p);
+    index++;
+    Record getted = Record(name);
+    if (getted == r) {
+      return index;
+    }
+  }
+  return -1;
+}
+
 size_t Storage::availableSize() {
   /* TODO maybe do: availableSize(char ** endBuffer) to get the endBuffer if it
    * is needed after calling availableSize */
@@ -146,13 +208,27 @@ Storage::Record::ErrorStatus Storage::notifyFullnessToDelegate() const {
 }
 
 Storage::Record::ErrorStatus Storage::createRecordWithFullName(const char * fullName, const void * data, size_t size) {
+  char * editableFullName = (char *)malloc(strlen(fullName) + 1 + strlen(examPrefix));
+    memset(editableFullName, 0, strlen(fullName) + 1 + strlen(examPrefix));
+  if (m_quarantine) { 
+    strlcpy(editableFullName, fullName, strlen(fullName));
+    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+    fullName = editableFullName;
+  }
   size_t recordSize = sizeOfRecordWithFullName(fullName, size);
   if (recordSize >= k_maxRecordSize || recordSize > availableSize()) {
+      free(editableFullName);
    return notifyFullnessToDelegate();
   }
   if (isFullNameTaken(fullName)) {
+      free(editableFullName);
     return Record::ErrorStatus::NameTaken;
   }
+  if (!FullNameCompliant(fullName)) {
+      free(editableFullName);
+    return Record::ErrorStatus::NonCompliantName;
+  }
+
   // Find the end of data
   char * newRecordAddress = endBuffer();
   char * newRecord = newRecordAddress;
@@ -168,32 +244,49 @@ Storage::Record::ErrorStatus Storage::createRecordWithFullName(const char * full
   notifyChangeToDelegate(r);
   m_lastRecordRetrieved = r;
   m_lastRecordRetrievedPointer = newRecordAddress;
+  free(editableFullName);
   return Record::ErrorStatus::None;
 }
 
 Storage::Record::ErrorStatus Storage::createRecordWithExtension(const char * baseName, const char * extension, const void * data, size_t size) {
-  size_t recordSize = sizeOfRecordWithBaseNameAndExtension(baseName, extension, size);
-  if (recordSize >= k_maxRecordSize || recordSize > availableSize()) {
-   return notifyFullnessToDelegate();
+    char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
+    memset(editableFullName, 0, strlen(baseName) + 1 + strlen(examPrefix));
+    if (m_quarantine) {
+      strlcpy(editableFullName, baseName, strlen(baseName));
+      strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+      baseName = editableFullName;
   }
-  if (isBaseNameWithExtensionTaken(baseName, extension)) {
-    return Record::ErrorStatus::NameTaken;
+    size_t recordSize = sizeOfRecordWithBaseNameAndExtension(baseName, extension, size);
+    if (recordSize >= k_maxRecordSize || recordSize > availableSize()) {
+        free(editableFullName);
+      return notifyFullnessToDelegate();
   }
-  // Find the end of data
-  char * newRecordAddress = endBuffer();
-  char * newRecord = newRecordAddress;
-  // Fill totalSize
-  newRecord += overrideSizeAtPosition(newRecord, (record_size_t)recordSize);
-  // Fill name
-  newRecord += overrideBaseNameWithExtensionAtPosition(newRecord, baseName, extension);
-  // Fill data
-  newRecord += overrideValueAtPosition(newRecord, data, size);
-  // Next Record is null-sized
-  overrideSizeAtPosition(newRecord, 0);
-  Record r = Record(fullNameOfRecordStarting(newRecordAddress));
-  notifyChangeToDelegate(r);
-  m_lastRecordRetrieved = r;
-  m_lastRecordRetrievedPointer = newRecordAddress;
+    if (isBaseNameWithExtensionTaken(baseName, extension)) {
+        free(editableFullName);
+      return Record::ErrorStatus::NameTaken;
+  }
+    if (!FullNameCompliant(baseName, true)) {
+        free(editableFullName);
+
+      return Record::ErrorStatus::NonCompliantName;
+  }
+
+    // Find the end of data
+    char * newRecordAddress = endBuffer();
+    char * newRecord = newRecordAddress;
+    // Fill totalSize
+    newRecord += overrideSizeAtPosition(newRecord, (record_size_t)recordSize);
+    // Fill name
+    newRecord += overrideBaseNameWithExtensionAtPosition(newRecord, baseName, extension);
+    // Fill data
+    newRecord += overrideValueAtPosition(newRecord, data, size);
+    // Next Record is null-sized
+    overrideSizeAtPosition(newRecord, 0);
+    Record r = Record(fullNameOfRecordStarting(newRecordAddress));
+    notifyChangeToDelegate(r);
+    m_lastRecordRetrieved = r;
+    m_lastRecordRetrievedPointer = newRecordAddress;
+  free(editableFullName);
   return Record::ErrorStatus::None;
 }
 
@@ -203,6 +296,12 @@ int Storage::numberOfRecordsWithExtension(const char * extension) {
   for (char * p : *this) {
     const char * name = fullNameOfRecordStarting(p);
     if (FullNameHasExtension(name, extension, extensionLength)) {
+      if (m_quarantine) {
+        int index = getRecordIndex(Record(name));
+        if (0 <= index && index <= m_barrierIndex) {
+          count--;
+        }
+      }
       count++;
     }
   }
@@ -213,12 +312,19 @@ int Storage::numberOfRecords() {
   int count = 0;
   for (char * p : *this) {
     const char * name = fullNameOfRecordStarting(p);
+    if (m_quarantine) {
+        int index = getRecordIndex(Record(name));
+        if (0 <= index && index <= m_barrierIndex) {
+          count--;
+        }
+      }
     count++;
   }
   return count;
 }
 
 Storage::Record Storage::recordAtIndex(int index) {
+  if (index <= m_barrierIndex) return Record();
   int currentIndex = -1;
   const char * name = nullptr;
   char * recordAddress = nullptr;
@@ -242,15 +348,20 @@ Storage::Record Storage::recordAtIndex(int index) {
 
 Storage::Record Storage::recordWithExtensionAtIndex(const char * extension, int index) {
   int currentIndex = -1;
+  int realCurrentIndex = -1;
   const char * name = nullptr;
   size_t extensionLength = strlen(extension);
   char * recordAddress = nullptr;
   for (char * p : *this) {
     const char * currentName = fullNameOfRecordStarting(p);
+    realCurrentIndex ++;
     if (FullNameHasExtension(currentName, extension, extensionLength)) {
       currentIndex++;
     }
     if (currentIndex == index) {
+      if (realCurrentIndex <= m_barrierIndex) {
+        return Record();
+      }
       recordAddress = p;
       name = currentName;
       break;
@@ -269,8 +380,16 @@ Storage::Record Storage::recordNamed(const char * fullName) {
   if (fullName == nullptr) {
     return Record();
   }
+  char * editableFullName = (char *)malloc(strlen(fullName) + 1 + strlen(examPrefix));
+  if (m_quarantine) { 
+    strlcpy(editableFullName, fullName, strlen(fullName));
+    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+    fullName = editableFullName;
+  }
   Record r = Record(fullName);
   char * p = pointerOfRecord(r);
+  memset(editableFullName, 0, strlen(fullName) + 1 + strlen(examPrefix));
+  free(editableFullName);
   if (p != nullptr) {
     return r;
   }
@@ -278,27 +397,63 @@ Storage::Record Storage::recordNamed(const char * fullName) {
 }
 
 Storage::Record Storage::recordBaseNamedWithExtension(const char * baseName, const char * extension) {
+  char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
+  if (m_quarantine) { 
+    strlcpy(editableFullName, baseName, strlen(baseName));
+    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+    baseName = editableFullName;
+  }
   const char * extensions[1] = {extension};
-  return recordBaseNamedWithExtensions(baseName, extensions, 1);
+  Record r = recordBaseNamedWithExtensions(baseName, extensions, 1);
+  memset(editableFullName, 0, strlen(baseName) + 1 + strlen(examPrefix));
+  free(editableFullName);
+  return r;
 }
 
 Storage::Record Storage::recordBaseNamedWithExtensions(const char * baseName, const char * const extensions[], size_t numberOfExtensions) {
-  return privateRecordAndExtensionOfRecordBaseNamedWithExtensions(baseName, extensions, numberOfExtensions);
+  char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
+  if (m_quarantine && !Storage::strstr(baseName, examPrefix)) {
+    strlcpy(editableFullName, baseName, strlen(baseName));
+    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+    baseName = editableFullName;
+  }
+  Record r = privateRecordAndExtensionOfRecordBaseNamedWithExtensions(baseName, extensions, numberOfExtensions);
+  memset(editableFullName, 0, strlen(baseName) + 1 + strlen(examPrefix));
+  free(editableFullName);
+  return r;
 }
 
 const char * Storage::extensionOfRecordBaseNamedWithExtensions(const char * baseName, int baseNameLength, const char * const extensions[], size_t numberOfExtensions) {
   const char * result = nullptr;
+   char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
+  if (m_quarantine) { 
+    strlcpy(editableFullName, baseName, strlen(baseName));
+    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+    baseName = editableFullName;
+    baseNameLength = static_cast<int>(strlen(baseName));
+  }
   privateRecordAndExtensionOfRecordBaseNamedWithExtensions(baseName, extensions, numberOfExtensions, &result, baseNameLength);
+  memset(editableFullName, 0, strlen(baseName) + 1 + strlen(examPrefix));
+  free(editableFullName);
   return result;
 }
 
 void Storage::destroyAllRecords() {
   overrideSizeAtPosition(m_buffer, 0);
   notifyChangeToDelegate();
+  m_quarantine = false;
+  m_barrierIndex = -1;
 }
 
 void Storage::destroyRecordWithBaseNameAndExtension(const char * baseName, const char * extension) {
-  recordBaseNamedWithExtension(baseName, extension).destroy();
+  Record r = recordBaseNamedWithExtension(baseName, extension);
+  if (m_quarantine && hasRecord(r)) {
+    int index = getRecordIndex(r);
+    if (0 <= index && index <= m_barrierIndex) {
+      m_barrierIndex --;
+    }
+  }
+  r.destroy();
 }
 
 void Storage::destroyRecordsWithExtension(const char * extension) {
@@ -309,6 +464,13 @@ void Storage::destroyRecordsWithExtension(const char * extension) {
     const char * currentFullName = fullNameOfRecordStarting(currentRecordStart);
     if (FullNameHasExtension(currentFullName, extension, extensionLength)) {
       Record currentRecord(currentFullName);
+      if (m_quarantine) {
+        int index = getRecordIndex(currentRecord);
+        if (index > m_barrierIndex) {
+          currentRecordStart = *(RecordIterator(currentRecordStart).operator++());
+          continue;
+        }
+      }
       currentRecord.destroy();
       didChange = true;
       continue;
@@ -328,7 +490,10 @@ Storage::Storage() :
   m_magicFooter(Magic),
   m_delegate(nullptr),
   m_lastRecordRetrieved(nullptr),
-  m_lastRecordRetrievedPointer(nullptr)
+  m_lastRecordRetrievedPointer(nullptr),
+  m_quarantine(false),
+  m_barrierIndex(-1),
+  m_examNumber(0)
 {
   assert(m_magicHeader == Magic);
   assert(m_magicFooter == Magic);
@@ -352,7 +517,7 @@ Storage::Record::ErrorStatus Storage::setFullNameOfRecord(const Record record, c
     return Record::ErrorStatus::NameTaken;
   }
   size_t nameSize = strlen(fullName) + 1;
-  char * p = pointerOfRecord(record);
+  char * p = pointerOfRecord(record); 
   if (p != nullptr) {
     size_t previousNameSize = strlen(fullNameOfRecordStarting(p))+1;
     record_size_t previousRecordSize = sizeOfRecordStarting(p);
@@ -527,10 +692,14 @@ bool Storage::isNameOfRecordTaken(Record r, const Record * recordToExclude) {
   return false;
 }
 
-bool Storage::FullNameCompliant(const char * fullName) {
+bool Storage::FullNameCompliant(const char * fullName, bool withoutExtension) {
   // We check that there is one dot and one dot only.
   const char * dotChar = UTF8Helper::CodePointSearch(fullName, k_dotChar);
-  if (*dotChar == 0) {
+  if (*dotChar == 0 && !withoutExtension) {
+    return false;
+  }
+  if (Storage::strstr(fullName, examPrefix)) { // Users can't use this prefix
+    // FIXME: this will return false even if it's the french word "examen". Maybe change the first letter to Uppercase ?
     return false;
   }
   if (*(UTF8Helper::CodePointSearch(dotChar+1, k_dotChar)) == 0) {
