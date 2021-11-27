@@ -211,9 +211,9 @@ Storage::Record::ErrorStatus Storage::createRecordWithFullName(const char * full
   char * editableFullName = (char *)malloc(strlen(fullName) + 1 + strlen(examPrefix));
     memset(editableFullName, 0, strlen(fullName) + 1 + strlen(examPrefix));
   if (m_quarantine) { 
-    strlcpy(editableFullName, fullName, strlen(fullName));
-    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
-    fullName = editableFullName;
+    strlcat(editableFullName, examPrefix, strlen(editableFullName));
+      strlcat(editableFullName, fullName, strlen(editableFullName));
+      fullName = editableFullName;
   }
   size_t recordSize = sizeOfRecordWithFullName(fullName, size);
   if (recordSize >= k_maxRecordSize || recordSize > availableSize()) {
@@ -252,8 +252,8 @@ Storage::Record::ErrorStatus Storage::createRecordWithExtension(const char * bas
     char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
     memset(editableFullName, 0, strlen(baseName) + 1 + strlen(examPrefix));
     if (m_quarantine) {
-      strlcpy(editableFullName, baseName, strlen(baseName));
-      strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+        strlcat(editableFullName, examPrefix, strlen(editableFullName));
+        strlcat(editableFullName, baseName, strlen(editableFullName));
       baseName = editableFullName;
   }
     size_t recordSize = sizeOfRecordWithBaseNameAndExtension(baseName, extension, size);
@@ -381,9 +381,9 @@ Storage::Record Storage::recordNamed(const char * fullName) {
     return Record();
   }
   char * editableFullName = (char *)malloc(strlen(fullName) + 1 + strlen(examPrefix));
-  if (m_quarantine) { 
-    strlcpy(editableFullName, fullName, strlen(fullName));
-    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+  if (m_quarantine) {
+      strlcat(editableFullName, examPrefix, strlen(editableFullName));
+      strlcat(editableFullName, fullName, strlen(editableFullName));
     fullName = editableFullName;
   }
   Record r = Record(fullName);
@@ -398,9 +398,9 @@ Storage::Record Storage::recordNamed(const char * fullName) {
 
 Storage::Record Storage::recordBaseNamedWithExtension(const char * baseName, const char * extension) {
   char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
-  if (m_quarantine) { 
-    strlcpy(editableFullName, baseName, strlen(baseName));
-    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+  if (m_quarantine) {
+      strlcat(editableFullName, examPrefix, strlen(editableFullName));
+      strlcat(editableFullName, baseName, strlen(editableFullName));
     baseName = editableFullName;
   }
   const char * extensions[1] = {extension};
@@ -413,8 +413,8 @@ Storage::Record Storage::recordBaseNamedWithExtension(const char * baseName, con
 Storage::Record Storage::recordBaseNamedWithExtensions(const char * baseName, const char * const extensions[], size_t numberOfExtensions) {
   char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
   if (m_quarantine && !Storage::strstr(baseName, examPrefix)) {
-    strlcpy(editableFullName, baseName, strlen(baseName));
-    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+      strlcat(editableFullName, examPrefix, strlen(editableFullName));
+      strlcat(editableFullName, baseName, strlen(editableFullName));
     baseName = editableFullName;
   }
   Record r = privateRecordAndExtensionOfRecordBaseNamedWithExtensions(baseName, extensions, numberOfExtensions);
@@ -426,9 +426,9 @@ Storage::Record Storage::recordBaseNamedWithExtensions(const char * baseName, co
 const char * Storage::extensionOfRecordBaseNamedWithExtensions(const char * baseName, int baseNameLength, const char * const extensions[], size_t numberOfExtensions) {
   const char * result = nullptr;
    char * editableFullName = (char *)malloc(strlen(baseName) + 1 + strlen(examPrefix));
-  if (m_quarantine) { 
-    strlcpy(editableFullName, baseName, strlen(baseName));
-    strlcpy(editableFullName, examPrefix, strlen(examPrefix));
+  if (m_quarantine) {
+      strlcat(editableFullName, examPrefix, strlen(editableFullName));
+      strlcat(editableFullName, baseName, strlen(editableFullName));
     baseName = editableFullName;
     baseNameLength = static_cast<int>(strlen(baseName));
   }
