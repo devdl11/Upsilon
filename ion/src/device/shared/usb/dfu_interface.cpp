@@ -378,6 +378,6 @@ void DFUInterface::leaveDFUAndReset(bool do_reset) {
   m_device->detach();
 }
 
-}  // namespace USB
-}  // namespace Device
-}  // namespace Ion
+}
+}
+}

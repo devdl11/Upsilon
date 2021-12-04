@@ -22,7 +22,7 @@ UsbInfoController::UsbInfoController(Responder *parentResponder) :
 }
 
 bool UsbInfoController::handleEvent(Ion::Events::Event event) {
-  if ((Ion::Events::OK == event || Ion::Events::EXE == event) && selectedRow() == 0) {
+  if ((Ion::Events::OK == event || Ion::Events::EXE == event || Ion::Events::Right == event) && selectedRow() == 0) {
     if (!GlobalPreferences::sharedGlobalPreferences()->dfuUnlocked()) {
       if (!GlobalPreferences::sharedGlobalPreferences()->isInExamMode()) {
         Ion::LED::setColor(KDColorPurple);
@@ -39,7 +39,7 @@ bool UsbInfoController::handleEvent(Ion::Events::Event event) {
     return true;
   }
 
-  if ((Ion::Events::OK == event || Ion::Events::EXE == event) && selectedRow() == 1) {
+  if ((Ion::Events::OK == event || Ion::Events::EXE == event || Ion::Events::Right == event) && selectedRow() == 1) {
     GenericSubController *subController = &m_usbProtectionLevelController;
     subController->setMessageTreeModel(m_messageTreeModel->childAtIndex(1));
     StackViewController *stack = stackController();
