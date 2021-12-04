@@ -14,9 +14,9 @@ using namespace Shared;
 namespace Settings {
 
 UsbInfoController::UsbInfoController(Responder *parentResponder) :
-        GenericSubController(parentResponder),
-        m_usbProtectionLevelController(this),
-        m_contentView(&m_selectableTableView) {
+    GenericSubController(parentResponder),
+    m_usbProtectionLevelController(this),
+    m_contentView(&m_selectableTableView) {
   m_switchCell.setMessageFont(KDFont::LargeFont);
   m_dfuLevelCell.setMessageFont(KDFont::LargeFont);
 }
