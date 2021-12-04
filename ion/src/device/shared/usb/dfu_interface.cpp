@@ -177,7 +177,7 @@ void DFUInterface::setAddressPointerCommand(SetupPacket *request, uint8_t *trans
   assert(transferBufferLength == 5);
   // Compute the new address but change it after the next getStatus request.
   m_potentialNewAddressPointer =
-          transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
+      transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
   m_state = State::dfuDNLOADSYNC;
 }
 
@@ -208,7 +208,7 @@ void DFUInterface::eraseCommand(uint8_t *transferBuffer, uint16_t transferBuffer
   assert(transferBufferLength == 5);
 
   m_eraseAddress =
-          transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
+      transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
 
   m_erasePage = Flash::SectorAtAddress(m_eraseAddress);
   if (m_erasePage < 0) {
