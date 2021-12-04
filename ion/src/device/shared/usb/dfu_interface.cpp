@@ -115,6 +115,9 @@ DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffe
       return getState(transferBuffer, transferBufferLength, transferBufferMaxLength);
     case (uint8_t)DFURequest::Abort:
       return dfuAbort(transferBufferLength);
+    case (uint8_t)DFURequest::Unlock:
+      m_dfuUnlocked = true;
+      return true;
   }
   return false;
 }

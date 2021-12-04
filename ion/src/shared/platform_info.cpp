@@ -25,20 +25,21 @@ constexpr void * storageAddress = &(Ion::staticStorageArea);
 class PlatformInfo {
 public:
   constexpr PlatformInfo() :
-    m_header(Magic),
-    m_version{EPSILON_VERSION},
-    m_patchLevel{PATCH_LEVEL},
-    m_storageAddress(storageAddress),
-    m_storageSize(Ion::Storage::k_storageSize),
-    m_footer(Magic),
-    m_ohm_header(OmegaMagic),
-    m_UpsilonVersion{OMEGA_VERSION},
+      m_header(Magic),
+      m_version{EPSILON_VERSION},
+      m_patchLevel{PATCH_LEVEL},
+      m_storageAddress(storageAddress),
+      m_storageSize(Ion::Storage::k_storageSize),
+      m_footer(Magic),
+      m_ohm_header(OmegaMagic),
+      m_UpsilonVersion{OMEGA_VERSION},
 #ifdef OMEGA_USERNAME
-    m_username{OMEGA_USERNAME},
+      m_username{OMEGA_USERNAME},
 #else
-    m_username{"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"},
+      m_username{"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"},
 #endif
-    m_ohm_footer(OmegaMagic) { }
+      m_osType(UpsilonMagic),
+      m_ohm_footer(OmegaMagic) { }
   const char * version() const {
     assert(m_storageAddress != nullptr);
     assert(m_storageSize != 0);
@@ -78,6 +79,7 @@ public:
 private:
   constexpr static uint32_t Magic = 0xDEC00DF0;
   constexpr static uint32_t OmegaMagic = 0xEFBEADDE;
+  constexpr static uint32_t UpsilonMagic = 0x55707369;
   uint32_t m_header;
   const char m_version[8];
   const char m_patchLevel[8];
@@ -87,6 +89,7 @@ private:
   uint32_t m_ohm_header;
   const char m_UpsilonVersion[16];
   const volatile char m_username[16];
+  uint32_t m_osType;
   uint32_t m_ohm_footer;
 };
 

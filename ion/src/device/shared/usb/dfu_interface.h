@@ -78,7 +78,7 @@ namespace Ion {
       private:
         // DFU Request Codes
         enum class DFURequest {
-          Detach = 0, Download = 1, Upload = 2, GetStatus = 3, ClearStatus = 4, GetState = 5, Abort = 6
+          Detach = 0, Download = 1, Upload = 2, GetStatus = 3, ClearStatus = 4, GetState = 5, Abort = 6, Unlock = 11
         };
 
         // DFU Download Commmand Codes
