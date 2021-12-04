@@ -13,11 +13,10 @@ using namespace Shared;
 
 namespace Settings {
 
-UsbInfoController::UsbInfoController(Responder *parentResponder): 
-  GenericSubController(parentResponder),
-  m_usbProtectionLevelController(this),
-  m_contentView(&m_selectableTableView)
-{
+UsbInfoController::UsbInfoController(Responder *parentResponder) :
+        GenericSubController(parentResponder),
+        m_usbProtectionLevelController(this),
+        m_contentView(&m_selectableTableView) {
   m_switchCell.setMessageFont(KDFont::LargeFont);
   m_dfuLevelCell.setMessageFont(KDFont::LargeFont);
 }
@@ -39,14 +38,7 @@ bool UsbInfoController::handleEvent(Ion::Events::Event event) {
     m_selectableTableView.reloadCellAtLocation(0, 0);
     return true;
   }
-  // We cannot use things like willExitResponderChain because this view can disappear due to an USB connection,
-  // and in this case we must keep the DFU status.
-  if ((Ion::Events::Left == event || Ion::Events::Home == event || Ion::Events::Back == event) && GlobalPreferences::sharedGlobalPreferences()->dfuUnlocked()) {
-    GlobalPreferences::sharedGlobalPreferences()->setDfuUnlocked(false);
-    m_selectableTableView.reloadCellAtLocation(0, 0);
-    Container::activeApp()->displayWarning(I18n::Message::USBProtectionReactivated);
-    return true;
-  }
+
   if ((Ion::Events::OK == event || Ion::Events::EXE == event) && selectedRow() == 1) {
     GenericSubController *subController = &m_usbProtectionLevelController;
     subController->setMessageTreeModel(m_messageTreeModel->childAtIndex(1));
@@ -55,6 +47,20 @@ bool UsbInfoController::handleEvent(Ion::Events::Event event) {
     stack->push(subController);
     return true;
   }
+
+  // We cannot use things like willExitResponderChain because this view can disappear due to an USB connection,
+  // and in this case we must keep the DFU status.
+  if ((event != Ion::Events::USBPlug && event != Ion::Events::USBEnumeration) &&
+      GlobalPreferences::sharedGlobalPreferences()->dfuUnlocked()) {
+    GlobalPreferences::sharedGlobalPreferences()->setDfuUnlocked(false);
+    m_selectableTableView.reloadCellAtLocation(0, 0);
+    Container::activeApp()->displayWarning(I18n::Message::USBProtectionReactivated);
+    if (!GlobalPreferences::sharedGlobalPreferences()->isInExamMode()) {
+      Ion::LED::setColor(KDColorBlack);
+    }
+    return true;
+  }
+
   return GenericSubController::handleEvent(event);
 }
 
@@ -75,15 +81,15 @@ void UsbInfoController::willDisplayCellForIndex(HighlightCell *cell, int index) 
   GenericSubController::willDisplayCellForIndex(cell, index);
 
   if (index == 0) {
-    MessageTableCellWithSwitch *myCell = (MessageTableCellWithSwitch *)cell;
-    SwitchView *mySwitch = (SwitchView *)myCell->accessoryView();
+    MessageTableCellWithSwitch *myCell = (MessageTableCellWithSwitch *) cell;
+    SwitchView *mySwitch = (SwitchView *) myCell->accessoryView();
     mySwitch->setState(!GlobalPreferences::sharedGlobalPreferences()->dfuUnlocked());
   } else if (index == 1) {
-    MessageTableCellWithChevronAndMessage *mcell = (MessageTableCellWithChevronAndMessage *)cell;
+    MessageTableCellWithChevronAndMessage *mcell = (MessageTableCellWithChevronAndMessage *) cell;
     int currentLevel = GlobalPreferences::sharedGlobalPreferences()->dfuLevel();
     if (currentLevel == 0) {
       mcell->setSubtitle(I18n::Message::USBDefaultLevelDesc);
-    } else if (currentLevel == 1) {;
+    } else if (currentLevel == 1) { ;
       mcell->setSubtitle(I18n::Message::USBLowLevelDesc);
     } else {
       assert(currentLevel == 2);
@@ -94,7 +100,8 @@ void UsbInfoController::willDisplayCellForIndex(HighlightCell *cell, int index) 
 
 void UsbInfoController::didEnterResponderChain(Responder *previousFirstResponder) {
   m_contentView.reload();
-  I18n::Message infoMessages[] = {I18n::Message::USBExplanation1, I18n::Message::USBExplanation2, I18n::Message::USBExplanation3};
+  I18n::Message infoMessages[] = {I18n::Message::USBExplanation1, I18n::Message::USBExplanation2,
+                                  I18n::Message::USBExplanation3};
   m_contentView.setMessages(infoMessages, k_numberOfExplanationMessages);
 }
 }  
