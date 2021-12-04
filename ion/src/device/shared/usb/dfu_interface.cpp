@@ -32,15 +32,15 @@ void DFUInterface::StateData::push(Channel *c) const {
 
 void DFUInterface::wholeDataReceivedCallback(SetupPacket *request, uint8_t *transferBuffer,
                                              uint16_t *transferBufferLength) {
-  if (request->bRequest() == (uint8_t) DFURequest::Download) {
+  if (request->bRequest() == (uint8_t)DFURequest::Download) {
     // Handle a download request
     if (request->wValue() == 0) {
       // The request is a special command
       switch (transferBuffer[0]) {
-        case (uint8_t) DFUDownloadCommand::SetAddressPointer:
+        case (uint8_t)DFUDownloadCommand::SetAddressPointer:
           setAddressPointerCommand(request, transferBuffer, *transferBufferLength);
           return;
-        case (uint8_t) DFUDownloadCommand::Erase:
+        case (uint8_t)DFUDownloadCommand::Erase:
           eraseCommand(transferBuffer, *transferBufferLength);
           return;
         default:
@@ -67,7 +67,7 @@ void DFUInterface::wholeDataReceivedCallback(SetupPacket *request, uint8_t *tran
 
 void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transferBuffer,
                                          uint16_t *transferBufferLength) {
-  if (request->bRequest() == (uint8_t) DFURequest::GetStatus) {
+  if (request->bRequest() == (uint8_t)DFURequest::GetStatus) {
     // Do any needed action after the GetStatus request.
     if (m_state == State::dfuMANIFEST) {
       /* If we leave the DFU and reset immediately, dfu-util outputs an error:
@@ -100,20 +100,20 @@ DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffe
     return true;
   }
   switch (request->bRequest()) {
-    case (uint8_t) DFURequest::Detach:
+    case (uint8_t)DFURequest::Detach:
       m_device->detach();
       return true;
-    case (uint8_t) DFURequest::Download:
+    case (uint8_t)DFURequest::Download:
       return processDownloadRequest(request->wLength(), transferBufferLength);
-    case (uint8_t) DFURequest::Upload:
+    case (uint8_t)DFURequest::Upload:
       return processUploadRequest(request, transferBuffer, transferBufferLength, transferBufferMaxLength);
-    case (uint8_t) DFURequest::GetStatus:
+    case (uint8_t)DFURequest::GetStatus:
       return getStatus(request, transferBuffer, transferBufferLength, transferBufferMaxLength);
-    case (uint8_t) DFURequest::ClearStatus:
+    case (uint8_t)DFURequest::ClearStatus:
       return clearStatus(request, transferBuffer, transferBufferLength, transferBufferMaxLength);
-    case (uint8_t) DFURequest::GetState:
+    case (uint8_t)DFURequest::GetState:
       return getState(transferBuffer, transferBufferLength, transferBufferMaxLength);
-    case (uint8_t) DFURequest::Abort:
+    case (uint8_t)DFURequest::Abort:
       return dfuAbort(transferBufferLength);
   }
   return false;
@@ -162,7 +162,7 @@ DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer
     uint32_t readAddress = (request->wValue() - 2) * Endpoint0::MaxTransferSize + m_addressPointer;
     // Copy the requested memory zone into the transfer buffer.
     uint16_t copySize = minUint32T(transferBufferMaxLength, request->wLength());
-    memcpy(transferBuffer, (void *) readAddress, copySize);
+    memcpy(transferBuffer, (void *)readAddress, copySize);
     *transferBufferLength = copySize;
   }
   m_state = State::dfuUPLOADIDLE;
@@ -234,7 +234,7 @@ void DFUInterface::writeOnMemory() {
   if (m_writeAddress >= k_sramStartAddress && m_writeAddress <= k_sramEndAddress) {
     // Write on SRAM
     // FIXME We should check that we are not overriding the current instructions.
-    memcpy((void *) m_writeAddress, m_largeBuffer, m_largeBufferLength);
+    memcpy((void *)m_writeAddress, m_largeBuffer, m_largeBufferLength);
     resetFlashParameters();  // We are writing in SRAM, so we can reset flash parameters
   } else if (Flash::SectorAtAddress(m_writeAddress) >= 0) {
     if (m_dfuLevel == 2) { // We don't accept update

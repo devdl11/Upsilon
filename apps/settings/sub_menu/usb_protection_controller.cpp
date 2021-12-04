@@ -81,11 +81,11 @@ void UsbInfoController::willDisplayCellForIndex(HighlightCell *cell, int index) 
   GenericSubController::willDisplayCellForIndex(cell, index);
 
   if (index == 0) {
-    MessageTableCellWithSwitch *myCell = (MessageTableCellWithSwitch *) cell;
-    SwitchView *mySwitch = (SwitchView *) myCell->accessoryView();
+    MessageTableCellWithSwitch *myCell = (MessageTableCellWithSwitch *)cell;
+    SwitchView *mySwitch = (SwitchView *)myCell->accessoryView();
     mySwitch->setState(!GlobalPreferences::sharedGlobalPreferences()->dfuUnlocked());
   } else if (index == 1) {
-    MessageTableCellWithChevronAndMessage *mcell = (MessageTableCellWithChevronAndMessage *) cell;
+    MessageTableCellWithChevronAndMessage *mcell = (MessageTableCellWithChevronAndMessage *)cell;
     int currentLevel = GlobalPreferences::sharedGlobalPreferences()->dfuLevel();
     if (currentLevel == 0) {
       mcell->setSubtitle(I18n::Message::USBDefaultLevelDesc);
