@@ -18,7 +18,6 @@ public:
   typedef uint16_t record_size_t;
 
   constexpr static size_t k_storageSize = 64000;
-  constexpr static size_t k_fullNameMaxSize = 220 + 5;
   static_assert(UINT16_MAX >= k_storageSize, "record_size_t not big enough");
 
   static Storage * sharedStorage();
@@ -28,7 +27,6 @@ public:
   static constexpr char expExtension[] = "exp";
   static constexpr char funcExtension[] = "func";
   static constexpr char seqExtension[] = "seq";
-  static constexpr char examPrefix[] = "exam";
 
   class Record {
     /* A Record is identified by the CRC32 on its fullName because:
@@ -66,13 +64,13 @@ public:
       return m_fullNameCRC32 == 0;
     }
     const char * fullName() const {
-      return Storage::sharedStorage()->fullNameOfRecord(*this, false);
+      return Storage::sharedStorage()->fullNameOfRecord(*this);
     }
     ErrorStatus setBaseNameWithExtension(const char * baseName, const char * extension) {
-      return Storage::sharedStorage()->setBaseNameWithExtensionOfRecord(*this, baseName, extension, false);
+      return Storage::sharedStorage()->setBaseNameWithExtensionOfRecord(*this, baseName, extension);
     }
     ErrorStatus setName(const char * fullName) {
-      return Storage::sharedStorage()->setFullNameOfRecord(*this, fullName, false);
+      return Storage::sharedStorage()->setFullNameOfRecord(*this, fullName);
     }
     Data value() const {
       return Storage::sharedStorage()->valueOfRecord(*this);
@@ -122,16 +120,9 @@ public:
   void destroyRecordWithBaseNameAndExtension(const char * baseName, const char * extension);
   void destroyRecordsWithExtension(const char * extension);
 
-  // Exam Mode
-  void activateQuarantine();
-  void deactivateQuarantine();
-  void setFullNameBufferWithPrefix(const char * prefix, const char * name);
-  static bool fullNameAuthorized(const char * fullname);
-
   // Useful
-  static bool FullNameCompliant(const char * name, bool withoutExtension = false);
-  static bool strstr(const char * first, const char * second);
-
+  static bool FullNameCompliant(const char * name);
+  
   // User by Python OS module
   int numberOfRecords();
   Record recordAtIndex(int index);
@@ -143,9 +134,9 @@ private:
   Storage();
 
   /* Getters/Setters on recordID */
-  const char * fullNameOfRecord(const Record record, bool system = false);
-  Record::ErrorStatus setFullNameOfRecord(const Record record, const char *fullName, bool system = false);
-  Record::ErrorStatus setBaseNameWithExtensionOfRecord(const Record record, const char *baseName, const char *extension, bool system = false);
+  const char * fullNameOfRecord(const Record record);
+  Record::ErrorStatus setFullNameOfRecord(const Record record, const char * fullName);
+  Record::ErrorStatus setBaseNameWithExtensionOfRecord(const Record record, const char * baseName, const char * extension);
   Record::Data valueOfRecord(const Record record);
   Record::ErrorStatus setValueOfRecord(const Record record, Record::Data data);
   void destroyRecord(const Record record);
@@ -195,9 +186,6 @@ private:
   StorageDelegate * m_delegate;
   mutable Record m_lastRecordRetrieved;
   mutable char * m_lastRecordRetrievedPointer;
-  bool m_quarantine;
-  int m_examNumber;
-  char m_fullNameBuffer[k_fullNameMaxSize];
 };
 
 /* Some apps memoize records and need to be notified when a record might have
