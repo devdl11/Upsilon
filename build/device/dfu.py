@@ -46,8 +46,8 @@ __DFU_UPLOAD    = 2
 __DFU_GETSTATUS = 3
 __DFU_CLRSTATUS = 4
 __DFU_GETSTATE  = 5
-__DFU_ABORT = 6
-__DFU_UNLOCK = 11
+__DFU_ABORT     = 6
+__DFU_UNLOCK    = 11
 
 # DFU status
 __DFU_STATE_APP_IDLE                 = 0x00

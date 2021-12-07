@@ -25,21 +25,21 @@ constexpr void * storageAddress = &(Ion::staticStorageArea);
 class PlatformInfo {
 public:
   constexpr PlatformInfo() :
-      m_header(Magic),
-      m_version{EPSILON_VERSION},
-      m_patchLevel{PATCH_LEVEL},
-      m_storageAddress(storageAddress),
-      m_storageSize(Ion::Storage::k_storageSize),
-      m_footer(Magic),
-      m_ohm_header(OmegaMagic),
-      m_UpsilonVersion{OMEGA_VERSION},
+    m_header(Magic),
+    m_version{EPSILON_VERSION},
+    m_patchLevel{PATCH_LEVEL},
+    m_storageAddress(storageAddress),
+    m_storageSize(Ion::Storage::k_storageSize),
+    m_footer(Magic),
+    m_ohm_header(OmegaMagic),
+    m_UpsilonVersion{OMEGA_VERSION},
 #ifdef OMEGA_USERNAME
-      m_username{OMEGA_USERNAME},
+    m_username{OMEGA_USERNAME},
 #else
-      m_username{"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"},
+    m_username{"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"},
 #endif
-      m_osType(UpsilonMagic),
-      m_ohm_footer(OmegaMagic) { }
+    m_osType(UpsilonMagic),
+    m_ohm_footer(OmegaMagic) { }
   const char * version() const {
     assert(m_storageAddress != nullptr);
     assert(m_storageSize != 0);

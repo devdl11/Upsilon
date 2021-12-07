@@ -14,9 +14,10 @@ using namespace Shared;
 namespace Settings {
 
 UsbInfoController::UsbInfoController(Responder *parentResponder) :
-    GenericSubController(parentResponder),
-    m_usbProtectionLevelController(this),
-    m_contentView(&m_selectableTableView) {
+  GenericSubController(parentResponder),
+  m_usbProtectionLevelController(this),
+  m_contentView(&m_selectableTableView)
+{
   m_switchCell.setMessageFont(KDFont::LargeFont);
   m_dfuLevelCell.setMessageFont(KDFont::LargeFont);
 }
@@ -89,7 +90,7 @@ void UsbInfoController::willDisplayCellForIndex(HighlightCell *cell, int index) 
     int currentLevel = GlobalPreferences::sharedGlobalPreferences()->dfuLevel();
     if (currentLevel == 0) {
       mcell->setSubtitle(I18n::Message::USBDefaultLevelDesc);
-    } else if (currentLevel == 1) { ;
+    } else if (currentLevel == 1) {;
       mcell->setSubtitle(I18n::Message::USBLowLevelDesc);
     } else {
       assert(currentLevel == 2);
@@ -100,8 +101,7 @@ void UsbInfoController::willDisplayCellForIndex(HighlightCell *cell, int index) 
 
 void UsbInfoController::didEnterResponderChain(Responder *previousFirstResponder) {
   m_contentView.reload();
-  I18n::Message infoMessages[] = {I18n::Message::USBExplanation1, I18n::Message::USBExplanation2,
-                                  I18n::Message::USBExplanation3};
+  I18n::Message infoMessages[] = {I18n::Message::USBExplanation1, I18n::Message::USBExplanation2,I18n::Message::USBExplanation3};
   m_contentView.setMessages(infoMessages, k_numberOfExplanationMessages);
 }
 }  

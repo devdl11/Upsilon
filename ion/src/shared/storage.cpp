@@ -2,6 +2,8 @@
 #include <string.h>
 #include <assert.h>
 #include <new>
+#include "ion/storage.h"
+
 #if ION_STORAGE_LOG
 #include<iostream>
 #endif
@@ -26,6 +28,7 @@ constexpr char Storage::expExtension[];
 constexpr char Storage::funcExtension[];
 constexpr char Storage::seqExtension[];
 constexpr char Storage::eqExtension[];
+constexpr char Storage::examPrefix[];
 
 Storage * Storage::sharedStorage() {
   static Storage * storage = new (staticStorageArea) Storage();
@@ -146,11 +149,15 @@ Storage::Record::ErrorStatus Storage::notifyFullnessToDelegate() const {
 }
 
 Storage::Record::ErrorStatus Storage::createRecordWithFullName(const char * fullName, const void * data, size_t size) {
+  setFullNameBufferWithPrefix(examPrefix, fullName);
+  if (m_quarantine) {
+    fullName = m_fullNameBuffer;
+  }
   size_t recordSize = sizeOfRecordWithFullName(fullName, size);
   if (recordSize >= k_maxRecordSize || recordSize > availableSize()) {
    return notifyFullnessToDelegate();
   }
-  if (isFullNameTaken(fullName)) {
+  if (isFullNameTaken(fullName) || (!m_quarantine && !fullNameAuthorized(fullName))) {
     return Record::ErrorStatus::NameTaken;
   }
   // Find the end of data
@@ -328,7 +335,10 @@ Storage::Storage() :
   m_magicFooter(Magic),
   m_delegate(nullptr),
   m_lastRecordRetrieved(nullptr),
-  m_lastRecordRetrievedPointer(nullptr)
+  m_lastRecordRetrievedPointer(nullptr),
+  m_quarantine(false),
+  m_examNumber(0),
+  m_fullNameBuffer()
 {
   assert(m_magicHeader == Magic);
   assert(m_magicFooter == Magic);
@@ -336,15 +346,16 @@ Storage::Storage() :
   overrideSizeAtPosition(m_buffer, 0);
 }
 
-const char * Storage::fullNameOfRecord(const Record record) {
+const char * Storage::fullNameOfRecord(const Record record, bool system) {
   char * p = pointerOfRecord(record);
   if (p != nullptr) {
-    return fullNameOfRecordStarting(p);
+    const char * name = fullNameOfRecordStarting(p);
+    return m_quarantine && !system && Storage::strstr(name, examPrefix) ? name + sizeof(examPrefix) : name;
   }
   return nullptr;
 }
 
-Storage::Record::ErrorStatus Storage::setFullNameOfRecord(const Record record, const char * fullName) {
+Storage::Record::ErrorStatus Storage::setFullNameOfRecord(const Record record, const char *fullName, bool system) {
   if (!FullNameCompliant(fullName)) {
     return Record::ErrorStatus::NonCompliantName;
   }
@@ -370,7 +381,7 @@ Storage::Record::ErrorStatus Storage::setFullNameOfRecord(const Record record, c
   return Record::ErrorStatus::RecordDoesNotExist;
 }
 
-Storage::Record::ErrorStatus Storage::setBaseNameWithExtensionOfRecord(Record record, const char * baseName, const char * extension) {
+Storage::Record::ErrorStatus Storage::setBaseNameWithExtensionOfRecord(const Record record, const char *baseName, const char *extension, bool system) {
   if (isBaseNameWithExtensionTaken(baseName, extension, &record)) {
     return Record::ErrorStatus::NameTaken;
   }
@@ -527,7 +538,7 @@ bool Storage::isNameOfRecordTaken(Record r, const Record * recordToExclude) {
   return false;
 }
 
-bool Storage::FullNameCompliant(const char * fullName) {
+bool Storage::FullNameCompliant(const char * fullName, bool withoutExtension) {
   // We check that there is one dot and one dot only.
   const char * dotChar = UTF8Helper::CodePointSearch(fullName, k_dotChar);
   if (*dotChar == 0) {
@@ -617,6 +628,55 @@ Storage::Record Storage::privateRecordAndExtensionOfRecordBaseNamedWithExtension
     *extensionResult = nullptr;
   }
   return Record();
+}
+
+void Storage::activateQuarantine() {
+  m_quarantine = true;
+  // TODO maybe do: check if there is enough space for the exam
+}
+
+bool Storage::strstr(const char * first, const char * second) {
+  size_t fSize = strlen(first);
+  size_t sSize = strlen(second);
+  if (fSize == sSize) {
+    return strcmp(first, second) == 0;
+  }
+  if (sSize > fSize) {
+    const char * buf = first;
+    first = second;
+    second = buf;
+    fSize = strlen(first);
+    sSize = strlen(second);
+  }
+  bool result = false;
+  int index = 0;
+  for (int i = 0; (size_t)i < fSize; i++) {
+    if (first[i] == second[index]) {
+      index++;
+      result = (size_t)index >= sSize;
+    } else if (fSize - 1 - (size_t)i < sSize - 1 - (size_t)index) {
+      break;
+    } else {
+      index = 0;
+    }
+    if (result) break;
+  }
+  return result;
+}
+
+void Storage::deactivateQuarantine() {
+
+}
+
+void Storage::setFullNameBufferWithPrefix(const char *prefix, const char *name) {
+  assert(sizeof(prefix) + sizeof(name) <= k_fullNameMaxSize);
+  memset(m_fullNameBuffer, 0, k_fullNameMaxSize);
+  strlcpy(m_fullNameBuffer, prefix, k_fullNameMaxSize);
+  strlcpy(m_fullNameBuffer, name, k_fullNameMaxSize);
+}
+
+bool Storage::fullNameAuthorized(const char *fullname) {
+  return !Storage::strstr(fullname, examPrefix);
 }
 
 Storage::RecordIterator & Storage::RecordIterator::operator++() {
