@@ -30,8 +30,7 @@ void DFUInterface::StateData::push(Channel *c) const {
   c->push(m_bState);
 }
 
-void DFUInterface::wholeDataReceivedCallback(SetupPacket *request, uint8_t *transferBuffer,
-                                             uint16_t *transferBufferLength) {
+void DFUInterface::wholeDataReceivedCallback(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength) {
   if (request->bRequest() == (uint8_t)DFURequest::Download) {
     // Handle a download request
     if (request->wValue() == 0) {
@@ -56,7 +55,6 @@ void DFUInterface::wholeDataReceivedCallback(SetupPacket *request, uint8_t *tran
     if (request->wLength() > 0) {
       // The request is a "real" download. Compute the writing address.
       m_writeAddress = (request->wValue() - 2) * Endpoint0::MaxTransferSize + m_addressPointer;
-
       // Store the received data until we copy it on the flash.
       memcpy(m_largeBuffer, transferBuffer, *transferBufferLength);
       m_largeBufferLength = *transferBufferLength;
@@ -65,18 +63,17 @@ void DFUInterface::wholeDataReceivedCallback(SetupPacket *request, uint8_t *tran
   }
 }
 
-void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transferBuffer,
-                                         uint16_t *transferBufferLength) {
+void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength) {
   if (request->bRequest() == (uint8_t)DFURequest::GetStatus) {
     // Do any needed action after the GetStatus request.
     if (m_state == State::dfuMANIFEST) {
       /* If we leave the DFU and reset immediately, dfu-util outputs an error:
- * "File downloaded successfully
- *  dfu-util: Error during download get_status"
- * If we sleep 1us here, there is no error. We put 1ms for security.
- * This error might be due to the USB connection being cut too soon after
- * the last USB exchange, so the host does not have time to process the
- * answer received for the last GetStatus request. */
+     * "File downloaded successfully
+     *  dfu-util: Error during download get_status"
+     * If we sleep 1us here, there is no error. We put 1ms for security.
+     * This error might be due to the USB connection being cut too soon after
+     * the last USB exchange, so the host does not have time to process the
+     * answer received for the last GetStatus request. */
       Ion::Timing::msleep(1);
       // Leave DFU routine: Leave DFU, reset device, jump to application code
       leaveDFUAndReset();
@@ -94,8 +91,7 @@ void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transfer
 }
 
 bool
-DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength,
-                                    uint16_t transferBufferMaxLength) {
+DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   if (Interface::processSetupInRequest(request, transferBuffer, transferBufferLength, transferBufferMaxLength)) {
     return true;
   }
@@ -141,17 +137,16 @@ bool DFUInterface::processDownloadRequest(uint16_t wLength, uint16_t *transferBu
 }
 
 bool
-DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength,
-                                   uint16_t transferBufferMaxLength) {
+DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   if (m_state != State::dfuIDLE && m_state != State::dfuUPLOADIDLE) {
     m_ep0->stallTransaction();
     return false;
   }
   if (request->wValue() == 0) {
     /* The host requests to read the commands supported by the bootloader. After
- * receiving this command, the device  should returns N bytes representing
- * the command codes for :
- * Get command / Set Address Pointer / Erase / Read Unprotect
+     * receiving this command, the device  should returns N bytes representing
+     * the command codes for :
+     * Get command / Set Address Pointer / Erase / Read Unprotect
  * We no not need it for now. */
     return false;
   } else if (request->wValue() == 1) {
@@ -159,7 +154,7 @@ DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer
     return false;
   } else {
     /* We decided to never protect Read operation. Else we would have to check
- * here it is not protected before reading. */
+    * here it is not protected before reading. */
 
     // Compute the reading address
     uint32_t readAddress = (request->wValue() - 2) * Endpoint0::MaxTransferSize + m_addressPointer;
@@ -172,12 +167,13 @@ DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer
   return true;
 }
 
-void DFUInterface::setAddressPointerCommand(SetupPacket *request, uint8_t *transferBuffer,
-                                            uint16_t transferBufferLength) {
+void DFUInterface::setAddressPointerCommand(SetupPacket *request, uint8_t *transferBuffer, uint16_t transferBufferLength) {
   assert(transferBufferLength == 5);
   // Compute the new address but change it after the next getStatus request.
-  m_potentialNewAddressPointer =
-      transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
+  m_potentialNewAddressPointer = transferBuffer[1]
+    + (transferBuffer[2] << 8)
+    + (transferBuffer[3] << 16)
+    + (transferBuffer[4] << 24);
   m_state = State::dfuDNLOADSYNC;
 }
 
@@ -337,8 +333,7 @@ void DFUInterface::writeOnMemory() {
   m_status = Status::OK;
 }
 
-bool DFUInterface::getStatus(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength,
-                             uint16_t transferBufferMaxLength) {
+bool DFUInterface::getStatus(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   // Change the status if needed
   if (m_state == State::dfuMANIFESTSYNC) {
     m_state = State::dfuMANIFEST;
@@ -350,8 +345,7 @@ bool DFUInterface::getStatus(SetupPacket *request, uint8_t *transferBuffer, uint
   return true;
 }
 
-bool DFUInterface::clearStatus(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength,
-                               uint16_t transferBufferMaxLength) {
+bool DFUInterface::clearStatus(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   m_status = Status::OK;
   m_state = State::dfuIDLE;
   return getStatus(request, transferBuffer, transferBufferLength, transferBufferMaxLength);
