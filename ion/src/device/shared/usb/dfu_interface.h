@@ -47,7 +47,7 @@ public:
   void wholeDataSentCallback(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength) override;
   bool isErasingAndWriting() const { return m_isErasingAndWriting; }
   void unlockDfu() { m_dfuUnlocked = true; };
-  void setLevel(int lvl) { m_dfuLevel = lvl; }
+  void setLevel(uint8_t lvl) { m_dfuLevel = lvl; }
 
 protected:
   void setActiveInterfaceAlternative(uint8_t interfaceAlternativeIndex) override {
@@ -144,13 +144,13 @@ private:
 
   /* The Flash and SRAM addresses are in flash.ld. However, dfu_interface is
 * linked with dfu.ld, so we cannot access the values. */
-  constexpr static uint32_t k_sramStartAddress = 0x20000000;
-  constexpr static uint32_t k_sramEndAddress = 0x20040000;
+  constexpr static uint32_t k_sramStartAddress      = 0x20000000;
+  constexpr static uint32_t k_sramEndAddress        = 0x20040000;
   constexpr static uint32_t k_ExternalBorderAddress = 0x90200000;
 
-  const static int k_internalMagicAddress = 0x1C4;
-  constexpr static int k_externalMagicAddress = 0x44f;
-  constexpr static uint8_t k_omegaMagic[4] = {0xF0, 0x0D, 0xC0, 0xDE};
+  const static int k_internalMagicAddress            = 0x1C4;
+  constexpr static int k_externalMagicAddress        = 0x44f;
+  constexpr static uint8_t k_omegaMagic[4]           = {0xF0, 0x0D, 0xC0, 0xDE};
   // TODO maybe do: add seperated upsilon magic (k_upsilonMagic)
   constexpr static uint8_t k_externalUpsilonMagic[4] = {0x32, 0x30, 0x30, 0x36};
 
@@ -206,7 +206,7 @@ private:
   int m_lastMemoryType; // -1: aucune; 0: internal; 1: external
   int m_lastPageErased; // -1 par défaut
   bool m_dfuUnlocked;
-  int m_dfuLevel;
+  uint8_t m_dfuLevel;
 };
 
 }
