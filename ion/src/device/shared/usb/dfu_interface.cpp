@@ -78,7 +78,6 @@ void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transfer
       // Leave DFU routine: Leave DFU, reset device, jump to application code
       leaveDFUAndReset();
     } else if (m_state == State::dfuDNBUSY) {
-      m_state = State::dfuDNBUSY;
       if (m_largeBufferLength != 0) {
         // Here, copy the data from the transfer buffer to the flash memory
         writeOnMemory();
@@ -90,8 +89,7 @@ void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transfer
   }
 }
 
-bool
-DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
+bool DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   if (Interface::processSetupInRequest(request, transferBuffer, transferBufferLength, transferBufferMaxLength)) {
     return true;
   }
@@ -136,8 +134,7 @@ bool DFUInterface::processDownloadRequest(uint16_t wLength, uint16_t *transferBu
   return true;
 }
 
-bool
-DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
+bool DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   if (m_state != State::dfuIDLE && m_state != State::dfuUPLOADIDLE) {
     m_ep0->stallTransaction();
     return false;
@@ -147,14 +144,14 @@ DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer
      * receiving this command, the device  should returns N bytes representing
      * the command codes for :
      * Get command / Set Address Pointer / Erase / Read Unprotect
- * We no not need it for now. */
+     * We no not need it for now. */
     return false;
   } else if (request->wValue() == 1) {
     m_ep0->stallTransaction();
     return false;
   } else {
     /* We decided to never protect Read operation. Else we would have to check
-    * here it is not protected before reading. */
+     * here it is not protected before reading. */
 
     // Compute the reading address
     uint32_t readAddress = (request->wValue() - 2) * Endpoint0::MaxTransferSize + m_addressPointer;
@@ -191,7 +188,7 @@ void DFUInterface::changeAddressPointerIfNeeded() {
 
 void DFUInterface::eraseCommand(uint8_t *transferBuffer, uint16_t transferBufferLength) {
   /* We determine whether the commands asks for a mass erase or which sector to
- * erase. The erase must be done after the next getStatus request. */
+   * erase. The erase must be done after the next getStatus request. */
   m_state = State::dfuDNLOADSYNC;
 
   if (transferBufferLength == 1) {
@@ -203,8 +200,10 @@ void DFUInterface::eraseCommand(uint8_t *transferBuffer, uint16_t transferBuffer
   // Sector erase
   assert(transferBufferLength == 5);
 
-  m_eraseAddress =
-      transferBuffer[1] + (transferBuffer[2] << 8) + (transferBuffer[3] << 16) + (transferBuffer[4] << 24);
+  m_eraseAddress = transferBuffer[1]
+    + (transferBuffer[2] << 8)
+    + (transferBuffer[3] << 16)
+    + (transferBuffer[4] << 24);
 
   m_erasePage = Flash::SectorAtAddress(m_eraseAddress);
   if (m_erasePage < 0) {
@@ -218,9 +217,16 @@ void DFUInterface::eraseMemoryIfNeeded() {
   if (m_erasePage < 0) {
     return;
   }
+
   willErase();
-  if ((m_eraseAddress >= k_ExternalBorderAddress && m_eraseAddress < ExternalFlash::Config::EndAddress) ||
-      m_dfuUnlocked) {
+
+  #if 0 // We don't erase now the flash memory to avoid crash if writing is refused
+  if (m_erasePage == Flash::TotalNumberOfSectors()) {
+    Flash::MassErase();
+  }
+  #endif
+
+  if ((m_eraseAddress >= k_ExternalBorderAddress && m_eraseAddress < ExternalFlash::Config::EndAddress) || m_dfuUnlocked) {
     int32_t order = Flash::SectorAtAddress(m_eraseAddress);
     Flash::EraseSector(order);
   }
@@ -245,8 +251,7 @@ void DFUInterface::writeOnMemory() {
 
     int currentMemoryType; // Detection of the current memory type (Internal or External)
 
-    if (m_writeAddress >= InternalFlash::Config::StartAddress &&
-        m_writeAddress <= InternalFlash::Config::EndAddress) {
+    if (m_writeAddress >= InternalFlash::Config::StartAddress && m_writeAddress <= InternalFlash::Config::EndAddress) {
       // We are writing in Internal where live the internal recovery (it's the most sensitive memory type)
       if (m_isInternalLocked && !m_dfuUnlocked) {
         // We have to check if external was written in order to

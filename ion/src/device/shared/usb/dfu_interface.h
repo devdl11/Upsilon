@@ -11,9 +11,12 @@
 #include <drivers/config/internal_flash.h>
 #include <drivers/config/external_flash.h>
 
-namespace Ion {
-namespace Device {
-namespace USB {
+namespace Ion
+{
+namespace Device
+{
+namespace USB
+{
 
 class DFUInterface : public Interface {
 
@@ -61,14 +64,14 @@ protected:
 private:
   // DFU Request Codes
   enum class DFURequest {
-    Detach      = 0,
-    Download    = 1,
-    Upload      = 2,
-    GetStatus   = 3,
-    ClearStatus = 4,
-    GetState    = 5,
-    Abort       = 6,
-    Unlock      = 11
+    Detach       = 0,
+    Download     = 1,
+    Upload       = 2,
+    GetStatus    = 3,
+    ClearStatus  = 4,
+    GetState     = 5,
+    Abort        = 6,
+    Unlock       = 11
   };
 
   // DFU Download Commmand Codes
@@ -80,7 +83,7 @@ private:
   };
 
   enum class Status : uint8_t {
-    OK = 0x00,
+    OK              = 0x00,
     errTARGET       = 0x01,
     errFILE         = 0x02,
     errWRITE        = 0x03,
@@ -114,17 +117,18 @@ private:
 
   class StatusData : public Streamable {
   public:
-    StatusData(Status status, State state, uint32_t pollTimeout = 10) : /* We put a default pollTimeout value of 1ms: if the device is busy, the
- * host has to wait 1ms before sending a getStatus Request. */
-            m_bStatus((uint8_t) status),
-            m_bwPollTimeout{uint8_t((pollTimeout >> 16) & 0xFF), uint8_t((pollTimeout >> 8) & 0xFF),uint8_t(pollTimeout & 0xFF)},
-            m_bState((uint8_t) state),
-            m_iString(0) {
-    }
+    StatusData(Status status, State state, uint32_t pollTimeout = 10) :
+    /* We put a default pollTimeout value of 1ms: if the device is busy, the
+     * host has to wait 1ms before sending a getStatus Request. */
+      m_bStatus((uint8_t) status),
+      m_bwPollTimeout{uint8_t((pollTimeout >> 16) & 0xFF), uint8_t((pollTimeout >> 8) & 0xFF),uint8_t(pollTimeout & 0xFF)},
+      m_bState((uint8_t) state),
+      m_iString(0)
+      {
+      }
 
   protected:
     void push(Channel *c) const override;
-
   private:
     uint8_t m_bStatus;          // Status resulting from the execution of the most recent request
     uint8_t m_bwPollTimeout[3]; // m_bwPollTimeout is 24 bits
@@ -178,10 +182,10 @@ private:
   void leaveDFUAndReset(bool do_reset = true);
 
   /* Erase and Write state. After starting the erase of flash memory, the user
-  * can no longer leave DFU mode by pressing the Back key of the keyboard. This
-  * way, we prevent the user from interrupting a software download. After every
-  * software download, the calculator resets, which unlocks the "exit on
-  * pressing back". */
+   * can no longer leave DFU mode by pressing the Back key of the keyboard. This
+   * way, we prevent the user from interrupting a software download. After every
+   * software download, the calculator resets, which unlocks the "exit on
+   * pressing back". */
   void willErase() { m_isErasingAndWriting = true; }
   void resetFlashParameters() {
     m_lastMemoryType = -1;
@@ -203,10 +207,10 @@ private:
   bool m_isFirstInternalPacket;
   bool m_isInternalLocked;
   bool m_isFirstExternalPacket;
-  int m_lastMemoryType; // -1: aucune; 0: internal; 1: external
-  int m_lastPageErased; // -1 par défaut
+  uint8_t m_lastMemoryType; // -1: None; 0: internal; 1: external
+  uint8_t m_lastPageErased; // -1 default value
   bool m_dfuUnlocked;
-  uint8_t m_dfuLevel;
+  uint8_t m_dfuLevel; // 0: Upsilon only, 1: Omega-forked only, 2: No update
 };
 
 }
