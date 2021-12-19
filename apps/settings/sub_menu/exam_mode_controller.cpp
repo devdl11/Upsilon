@@ -7,6 +7,7 @@
 #include <cmath>
 #include <poincare/preferences.h>
 #include <apps/i18n.h>
+#include <ion.h>
 
 using namespace Poincare;
 using namespace Shared;
@@ -112,7 +113,11 @@ GlobalPreferences::ExamMode ExamModeController::examMode() {
   GlobalPreferences::ExamMode mode = GlobalPreferences::sharedGlobalPreferences()->tempExamMode();
   if (GlobalPreferences::sharedGlobalPreferences()->isInExamMode()) {
     // If the exam mode is already on, this re-activate the same exam mode
+    #ifdef ION_SIMULATOR_FILES
+    mode = GlobalPreferences::ExamMode::Off;
+    #else
     mode = GlobalPreferences::sharedGlobalPreferences()->examMode();
+    #endif
   }
   return mode;
 }

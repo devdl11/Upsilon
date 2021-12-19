@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define ION_STORAGE_LOG 1
 namespace Ion {
 
 /* Storage : | Magic |             Record1                 |            Record2                  | ... | Magic |
@@ -90,6 +91,7 @@ public:
 
 #if ION_STORAGE_LOG
   void log();
+  void logMessage(const char * message);
 #endif
 
   size_t availableSize();
@@ -133,7 +135,7 @@ public:
   static bool strstr(const char * first, const char * second);
 
   // User by Python OS module
-  int numberOfRecords();
+  int numberOfRecords(bool system = false);
   Record recordAtIndex(int index);
 
 private:
