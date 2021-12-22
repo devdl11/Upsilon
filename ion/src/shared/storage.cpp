@@ -3,6 +3,10 @@
 #include <assert.h>
 #include <new>
 #include "ion/storage.h"
+#include <stdio.h>
+#include <apps/shared/poincare_helpers.h>
+#include <poincare/integer.h>
+#include <poincare/serialization_helper.h>
 
 #if ION_STORAGE_LOG
 #include<iostream>
@@ -29,6 +33,13 @@ constexpr char Storage::funcExtension[];
 constexpr char Storage::seqExtension[];
 constexpr char Storage::eqExtension[];
 constexpr char Storage::examPrefix[];
+
+constexpr uint8_t Storage::expMaxRecords;
+constexpr uint8_t Storage::funcMaxRecords;
+constexpr uint8_t Storage::seqMaxRecords;
+constexpr uint8_t Storage::eqMaxRecords;
+
+constexpr uint8_t Storage::noMaxRecords;
 
 Storage * Storage::sharedStorage() {
   static Storage * storage = new (staticStorageArea) Storage();
@@ -210,6 +221,7 @@ Storage::Record::ErrorStatus Storage::createRecordWithExtension(const char * bas
   if (isBaseNameWithExtensionTaken(baseName, extension) || (!m_quarantine && !fullNameAuthorized(baseName))) {
     return Record::ErrorStatus::NameTaken;
   }
+  deleteRecordByExtensionIfNeeded(extension);
   // Find the end of data
   char * newRecordAddress = endBuffer();
   char * newRecord = newRecordAddress;
@@ -233,7 +245,7 @@ Storage::Record::ErrorStatus Storage::createRecordWithExtension(const char * bas
   return Record::ErrorStatus::None;
 }
 
-int Storage::numberOfRecordsWithExtension(const char * extension) {
+int Storage::numberOfRecordsWithExtension(const char * extension, bool system) {
   int count = 0;
   size_t extensionLength = strlen(extension);
   #if ION_STORAGE_LOG
@@ -244,7 +256,7 @@ int Storage::numberOfRecordsWithExtension(const char * extension) {
     #if ION_STORAGE_LOG
     logMessage(name);
     #endif
-    if (FullNameHasExtension(name, extension, extensionLength) && !(m_quarantine && !strstr(name, examPrefix))) {
+    if (FullNameHasExtension(name, extension, extensionLength) && !(m_quarantine && !strstr(name, examPrefix) && !system)) {
       count++;
       #if ION_STORAGE_LOG
       logMessage("Counted !");
@@ -477,6 +489,13 @@ Storage::Record::ErrorStatus Storage::setFullNameOfRecord(const Record record, c
   logMessage(fullName);
   #endif
   if (m_quarantine && !system) {
+    if (!fullNameAuthorized(fullName)) {
+      #if ION_STORAGE_LOG
+      logMessage("NonCompliant return");
+      logMessage("setFullNameOfRecord end");
+      #endif
+      return Record::ErrorStatus::NonCompliantName;
+    }
     setFullNameBufferWithPrefix(examPrefix, fullName); 
     fullName = m_fullNameBuffer;
   }
@@ -534,8 +553,15 @@ Storage::Record::ErrorStatus Storage::setBaseNameWithExtensionOfRecord(Record re
   logMessage("setBaseNameWithExtensionOfRecord start");
   logMessage(baseName);
   #endif
-  setFullNameBufferWithPrefix(examPrefix, baseName);
   if (m_quarantine && !system) {
+    if (!fullNameAuthorized(baseName)) {
+      #if ION_STORAGE_LOG
+      logMessage("Taken return");
+      logMessage("setBaseNameWithExtensionOfRecord end");
+      #endif
+      return Record::ErrorStatus::NameTaken;
+    }
+    setFullNameBufferWithPrefix(examPrefix, baseName);
     baseName = m_fullNameBuffer;
   }
   if (isBaseNameWithExtensionTaken(baseName, extension, &record) || (!m_quarantine && !fullNameAuthorized(baseName))) {
@@ -811,6 +837,9 @@ Storage::Record Storage::privateRecordAndExtensionOfRecordBaseNamedWithExtension
 }
 
 void Storage::activateQuarantine() {
+  if (m_quarantine) {
+    deactivateQuarantine();
+  }
   m_quarantine = true;
   // TODO maybe do: check if there is enough space for the exam
 }
@@ -845,37 +874,74 @@ bool Storage::strstr(const char * first, const char * second) {
 }
 
 void Storage::deactivateQuarantine() {
-  assert(m_quarantine);
-  int count = numberOfRecords(true);
-  const char * buffer[count];
-  int index = 0;
+  if (!m_quarantine) {
+    return;
+  }
+  int count = numberOfRecords();
   #ifdef ION_STORAGE_LOG
   logMessage("deactivateQuarantine start");
   #endif
   
-  for (char * p : *this) {
-    const char * name = fullNameOfRecordStarting(p);
-    if (strstr(name, examPrefix)) {
-      buffer[index] = name;
-      index ++;
+  for (int i = 0; i < count; i++) {
+    for (char * p : *this) {
+      const char * name = fullNameOfRecordStarting(p);
+      if (strstr(name, examPrefix)) {
+        #ifdef ION_STORAGE_LOG
+        logMessage(name);
+        #endif
+        Record r = Record(name);
+        const char * originalNameP = fullNameOfRecord(r, false);
+        if (!isFullNameTaken(originalNameP)) {
+          setFullNameOfRecord(r, originalNameP, true);
+          break;
+        }
+        const char * dotChar = UTF8Helper::CodePointSearch(originalNameP, k_dotChar);
+        char originalName[k_fullNameMaxSize];
+        char extension[k_extensionMaxSize];
+        size_t originalSize;
+        if (*dotChar != 0) {
+          originalSize = strlen(originalNameP) - strlen(originalNameP + strlen(originalNameP) - strlen(dotChar));
+          strlcpy(originalName, originalNameP, originalSize + 1);
+          originalName[originalSize + 1] = '\0';
+          strlcpy(extension, originalNameP + originalSize, k_extensionMaxSize);
+        } else {
+          originalSize = strlen(originalNameP);
+          strlcpy(originalName, originalNameP, originalSize);
+        }
+        #ifdef ION_STORAGE_LOG
+        logMessage(originalNameP);
+        logMessage(originalName);
+        logMessage(extension);
+        #endif
+        int current = 0;
+        char converted[3];
+        Poincare::Integer(current).serialize(&converted[0], 3);
+        // sprintf(converted, "%d", current);
+        setFullNameBufferWithPrefix(originalName, converted);
+        if (*dotChar != 0) {
+          strlcat(m_fullNameBuffer, extension, k_fullNameMaxSize);
+          #ifdef ION_STORAGE_LOG
+          logMessage("--");
+          logMessage(m_fullNameBuffer);
+          logMessage("--");
+          #endif
+        }
+        while (isFullNameTaken(m_fullNameBuffer)) {
+          current ++;
+          converted[3];
+          Poincare::Integer(current).serialize(&converted[0], 3);
+          // sprintf(converted, "%d", current);
+          setFullNameBufferWithPrefix(originalName, converted);
+          if (*dotChar != 0) {
+            strlcat(m_fullNameBuffer, extension, k_fullNameMaxSize);
+          }
+        }
+        setFullNameOfRecord(r, m_fullNameBuffer, true);
+        break;
+      }
     }
   }
-  for (int i = 0; i <= index; i++) {
-    Record r = Record(buffer[i]);
-    const char * originalName = fullNameOfRecord(r, false);
-    #ifdef ION_STORAGE_LOG
-    logMessage(originalName);
-    #endif
-    int current = 0;
-    char converted = current;
-    setFullNameBufferWithPrefix(originalName, &converted);
-    while (isFullNameTaken(m_fullNameBuffer)) {
-      current ++;
-      converted = current;
-      setFullNameBufferWithPrefix(originalName, &converted);
-    }
-    setFullNameOfRecord(r, m_fullNameBuffer, true);
-  }
+  
   #ifdef ION_STORAGE_LOG
   logMessage("deactivateQuarantine end");
   #endif
@@ -894,6 +960,33 @@ void Storage::setFullNameBufferWithPrefix(const char *prefix, const char *name) 
   logMessage(m_fullNameBuffer);
   logMessage("setFullNameBufferWithPrefix end");
   #endif
+}
+
+void Storage::deleteRecordByExtensionIfNeeded(const char * extension) {
+  const uint8_t * limit;
+  if (strcmp(extension, eqExtension) == 0) {
+    limit = &eqMaxRecords;
+  } else if (strcmp(extension, seqExtension) == 0) {
+    limit = &seqMaxRecords;
+  } else {
+    limit = &noMaxRecords;
+  }
+  if (*limit == -1 || !m_quarantine) {
+    return;
+  }
+  int currentNumber = numberOfRecordsWithExtension(extension, true);
+  if (currentNumber + 1 <= *limit) {
+    return;
+  }
+  for (char * p : *this) {
+    const char * name = fullNameOfRecordStarting(p);
+    if (FullNameHasExtension(name, extension, strlen(extension)) && !strstr(name, examPrefix)) {
+      Record r = Record(name);
+      destroyRecord(r);
+      break;
+    }
+  }
+
 }
 
 bool Storage::fullNameAuthorized(const char *fullname) {

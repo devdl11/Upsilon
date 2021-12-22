@@ -113,7 +113,7 @@ GlobalPreferences::ExamMode ExamModeController::examMode() {
   GlobalPreferences::ExamMode mode = GlobalPreferences::sharedGlobalPreferences()->tempExamMode();
   if (GlobalPreferences::sharedGlobalPreferences()->isInExamMode()) {
     // If the exam mode is already on, this re-activate the same exam mode
-    #ifdef ION_SIMULATOR_FILES
+    #if 0
     mode = GlobalPreferences::ExamMode::Off;
     #else
     mode = GlobalPreferences::sharedGlobalPreferences()->examMode();

@@ -3,8 +3,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#define ION_STORAGE_LOG 1
 namespace Ion {
 
 /* Storage : | Magic |             Record1                 |            Record2                  | ... | Magic |
@@ -20,6 +18,7 @@ public:
 
   constexpr static size_t k_storageSize = 64000;
   constexpr static size_t k_fullNameMaxSize = 220 + 5;
+  constexpr static size_t k_extensionMaxSize = 10;
   static_assert(UINT16_MAX >= k_storageSize, "record_size_t not big enough");
 
   static Storage * sharedStorage();
@@ -30,6 +29,13 @@ public:
   static constexpr char funcExtension[] = "func";
   static constexpr char seqExtension[] = "seq";
   static constexpr char examPrefix[] = "exam";
+
+  static constexpr uint8_t eqMaxRecords = 6;
+  static constexpr uint8_t expMaxRecords = -1;
+  static constexpr uint8_t funcMaxRecords = -1;
+  static constexpr uint8_t seqMaxRecords = 3;
+
+  static constexpr uint8_t noMaxRecords = -1;
 
   class Record {
     /* A Record is identified by the CRC32 on its fullName because:
@@ -104,7 +110,7 @@ public:
   void notifyChangeToDelegate(const Record r = Record()) const;
   Record::ErrorStatus notifyFullnessToDelegate() const;
 
-  int numberOfRecordsWithExtension(const char * extension);
+  int numberOfRecordsWithExtension(const char * extension, bool system = false);
   static bool FullNameHasExtension(const char * fullName, const char * extension, size_t extensionLength);
 
   // Record creation
@@ -129,6 +135,7 @@ public:
   void deactivateQuarantine();
   void setFullNameBufferWithPrefix(const char * prefix, const char * name);
   static bool fullNameAuthorized(const char * fullname);
+  void deleteRecordByExtensionIfNeeded(const char * extension);
 
   // Useful
   static bool FullNameCompliant(const char * name, bool withoutExtension = false);

@@ -32,7 +32,7 @@ public:
   App::Snapshot * hardwareTestAppSnapshot();
   App::Snapshot * onBoardingAppSnapshot();
   App::Snapshot * usbConnectedAppSnapshot();
-  void reset();
+  void reset(bool storage = true);
   Poincare::Context * globalContext();
   MathToolbox * mathToolbox();
   MathVariableBoxController * variableBoxController();

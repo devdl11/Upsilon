@@ -92,9 +92,14 @@ App::Snapshot * AppsContainer::usbConnectedAppSnapshot() {
   return &m_usbConnectedSnapshot;
 }
 
-void AppsContainer::reset() {
-  // Empty storage (delete functions, variables, python scripts)
-  Ion::Storage::sharedStorage()->destroyAllRecords();
+void AppsContainer::reset(bool storage) {
+  if (storage) {
+    // Empty storage (delete functions, variables, python scripts)
+    Ion::Storage::sharedStorage()->destroyAllRecords();
+  } else {
+    // Activate Quarantine
+    Ion::Storage::sharedStorage()->activateQuarantine();
+  }
   // Empty clipboard
   Clipboard::sharedClipboard()->reset();
   for (int i = 0; i < numberOfApps(); i++) {
@@ -411,11 +416,7 @@ void AppsContainer::redrawWindow(bool force) {
 
 void AppsContainer::activateExamMode(GlobalPreferences::ExamMode examMode) {
   assert(examMode != GlobalPreferences::ExamMode::Off && examMode != GlobalPreferences::ExamMode::Unknown);
-  if (examMode == GlobalPreferences::ExamMode::Standard) {
-    Ion::Storage::sharedStorage()->activateQuarantine();
-  } else {
-    reset();
-  }
+  reset(examMode != GlobalPreferences::ExamMode::Standard);
   Ion::LED::setColor(KDColorRed);
   /* The Dutch exam mode LED is supposed to be orange but we can only make
    * blink "pure" colors: with RGB leds on or off (as the PWM is used for
