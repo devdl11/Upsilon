@@ -536,6 +536,7 @@ Storage::Record::ErrorStatus Storage::setFullNameOfRecord(const Record record, c
     m_lastRecordRetrieved = record;
     m_lastRecordRetrievedPointer = p;
     #if ION_STORAGE_LOG
+    logMessage(record.fullName());
     logMessage("return None");
     logMessage("setFullNameOfRecord end");
     #endif
@@ -893,7 +894,9 @@ void Storage::deactivateQuarantine() {
         Record r = Record(name);
         const char * originalNameP = fullNameOfRecord(r, false);
         if (!isFullNameTaken(originalNameP)) {
-          setFullNameOfRecord(r, originalNameP, true);
+          memset(m_fullNameBuffer, 0, k_fullNameMaxSize);
+          strlcpy(m_fullNameBuffer, originalNameP, k_fullNameMaxSize);
+          setFullNameOfRecord(r, m_fullNameBuffer, true);
           break;
         }
         const char * dotChar = UTF8Helper::CodePointSearch(originalNameP, k_dotChar);
