@@ -3,12 +3,12 @@
 #include <assert.h>
 #include <new>
 #include "ion/storage.h"
-#include <stdio.h>
 #include <apps/shared/poincare_helpers.h>
 #include <poincare/integer.h>
 #include <poincare/serialization_helper.h>
 
 #if ION_STORAGE_LOG
+#include <stdio.h>
 #include<iostream>
 #endif
 
@@ -881,6 +881,7 @@ void Storage::deactivateQuarantine() {
   #ifdef ION_STORAGE_LOG
   logMessage("deactivateQuarantine start");
   #endif
+  char availableNames[3] = {'u', 'v', 'w'};
   
   for (int i = 0; i < count; i++) {
     for (char * p : *this) {
@@ -904,6 +905,9 @@ void Storage::deactivateQuarantine() {
           strlcpy(originalName, originalNameP, originalSize + 1);
           originalName[originalSize + 1] = '\0';
           strlcpy(extension, originalNameP + originalSize, k_extensionMaxSize);
+          if (strcmp(originalNameP + originalSize + 1, seqExtension) == 0) {
+            continue;
+          }
         } else {
           originalSize = strlen(originalNameP);
           strlcpy(originalName, originalNameP, originalSize);
@@ -916,7 +920,6 @@ void Storage::deactivateQuarantine() {
         int current = 0;
         char converted[3];
         Poincare::Integer(current).serialize(&converted[0], 3);
-        // sprintf(converted, "%d", current);
         setFullNameBufferWithPrefix(originalName, converted);
         if (*dotChar != 0) {
           strlcat(m_fullNameBuffer, extension, k_fullNameMaxSize);
@@ -930,7 +933,6 @@ void Storage::deactivateQuarantine() {
           current ++;
           converted[3];
           Poincare::Integer(current).serialize(&converted[0], 3);
-          // sprintf(converted, "%d", current);
           setFullNameBufferWithPrefix(originalName, converted);
           if (*dotChar != 0) {
             strlcat(m_fullNameBuffer, extension, k_fullNameMaxSize);
@@ -941,7 +943,29 @@ void Storage::deactivateQuarantine() {
       }
     }
   }
-  
+  int currentIndex = 0;
+  for (int i = 0; i < numberOfRecordsWithExtension(seqExtension, true); i ++) {
+    for (char *p : *this) {
+      const char * name = fullNameOfRecordStarting(p);
+      if (strstr(name, seqExtension)) {
+        if (currentIndex < i) {
+          currentIndex ++;
+          continue;
+        }
+        Record r = Record(name);
+        const char * originalNameP = fullNameOfRecord(r, false);
+        const char * dotChar = UTF8Helper::CodePointSearch(originalNameP, k_dotChar);
+        char extension[k_extensionMaxSize];
+        size_t originalSize;
+        originalSize = strlen(originalNameP) - strlen(originalNameP + strlen(originalNameP) - strlen(dotChar));
+        strlcpy(extension, originalNameP + originalSize, k_extensionMaxSize);
+        setFullNameBufferWithPrefix(&availableNames[i], extension);
+        setFullNameOfRecord(r, m_fullNameBuffer, true);
+        currentIndex = 0;
+        break;
+      }
+    }
+  }
   #ifdef ION_STORAGE_LOG
   logMessage("deactivateQuarantine end");
   #endif

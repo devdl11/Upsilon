@@ -114,7 +114,7 @@ private:
 
   class StatusData : public Streamable {
   public:
-    StatusData(Status status, State state, uint32_t pollTimeout = 10) : /* We put a default pollTimeout value of 1ms: if the device is busy, the
+    StatusData(Status status, State state, uint32_t pollTimeout = 1) : /* We put a default pollTimeout value of 1ms: if the device is busy, the
  * host has to wait 1ms before sending a getStatus Request. */
             m_bStatus((uint8_t) status),
             m_bwPollTimeout{uint8_t((pollTimeout >> 16) & 0xFF), uint8_t((pollTimeout >> 8) & 0xFF),uint8_t(pollTimeout & 0xFF)},
