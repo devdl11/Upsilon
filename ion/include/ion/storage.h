@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
 namespace Ion {
 
 /* Storage : | Magic |             Record1                 |            Record2                  | ... | Magic |
@@ -17,7 +16,9 @@ class Storage {
 public:
   typedef uint16_t record_size_t;
 
-  constexpr static size_t k_storageSize = 64000;
+  constexpr static size_t k_storageSize = 63996;
+  constexpr static size_t k_fullNameMaxSize = 220 + 5;
+  constexpr static size_t k_extensionMaxSize = 10;
   static_assert(UINT16_MAX >= k_storageSize, "record_size_t not big enough");
 
   static Storage * sharedStorage();
@@ -27,6 +28,14 @@ public:
   static constexpr char expExtension[] = "exp";
   static constexpr char funcExtension[] = "func";
   static constexpr char seqExtension[] = "seq";
+  static constexpr char examPrefix[] = "exam";
+
+  static constexpr uint8_t eqMaxRecords = 6;
+  static constexpr uint8_t expMaxRecords = -1;
+  static constexpr uint8_t funcMaxRecords = -1;
+  static constexpr uint8_t seqMaxRecords = 3;
+
+  static constexpr uint8_t noMaxRecords = -1;
 
   class Record {
     /* A Record is identified by the CRC32 on its fullName because:
@@ -64,13 +73,13 @@ public:
       return m_fullNameCRC32 == 0;
     }
     const char * fullName() const {
-      return Storage::sharedStorage()->fullNameOfRecord(*this);
+      return Storage::sharedStorage()->fullNameOfRecord(*this, false);
     }
     ErrorStatus setBaseNameWithExtension(const char * baseName, const char * extension) {
-      return Storage::sharedStorage()->setBaseNameWithExtensionOfRecord(*this, baseName, extension);
+      return Storage::sharedStorage()->setBaseNameWithExtensionOfRecord(*this, baseName, extension, false);
     }
     ErrorStatus setName(const char * fullName) {
-      return Storage::sharedStorage()->setFullNameOfRecord(*this, fullName);
+      return Storage::sharedStorage()->setFullNameOfRecord(*this, fullName, false);
     }
     Data value() const {
       return Storage::sharedStorage()->valueOfRecord(*this);
@@ -88,6 +97,7 @@ public:
 
 #if ION_STORAGE_LOG
   void log();
+  void logMessage(const char * message);
 #endif
 
   size_t availableSize();
@@ -100,7 +110,7 @@ public:
   void notifyChangeToDelegate(const Record r = Record()) const;
   Record::ErrorStatus notifyFullnessToDelegate() const;
 
-  int numberOfRecordsWithExtension(const char * extension);
+  int numberOfRecordsWithExtension(const char * extension, bool system = false);
   static bool FullNameHasExtension(const char * fullName, const char * extension, size_t extensionLength);
 
   // Record creation
@@ -120,11 +130,19 @@ public:
   void destroyRecordWithBaseNameAndExtension(const char * baseName, const char * extension);
   void destroyRecordsWithExtension(const char * extension);
 
+  // Exam Mode
+  void activateQuarantine();
+  void deactivateQuarantine();
+  void setFullNameBufferWithPrefix(const char * prefix, const char * name);
+  static bool fullNameAuthorized(const char * fullname);
+  void deleteRecordByExtensionIfNeeded(const char * extension);
+
   // Useful
-  static bool FullNameCompliant(const char * name);
-  
+  static bool FullNameCompliant(const char * name, bool withoutExtension = false);
+  static bool strstr(const char * first, const char * second);
+
   // User by Python OS module
-  int numberOfRecords();
+  int numberOfRecords(bool system = false);
   Record recordAtIndex(int index);
 
 private:
@@ -134,9 +152,9 @@ private:
   Storage();
 
   /* Getters/Setters on recordID */
-  const char * fullNameOfRecord(const Record record);
-  Record::ErrorStatus setFullNameOfRecord(const Record record, const char * fullName);
-  Record::ErrorStatus setBaseNameWithExtensionOfRecord(const Record record, const char * baseName, const char * extension);
+  const char * fullNameOfRecord(const Record record, bool system = false);
+  Record::ErrorStatus setFullNameOfRecord(const Record record, const char *fullName, bool system = false);
+  Record::ErrorStatus setBaseNameWithExtensionOfRecord(const Record record, const char *baseName, const char *extension, bool system = false);
   Record::Data valueOfRecord(const Record record);
   Record::ErrorStatus setValueOfRecord(const Record record, Record::Data data);
   void destroyRecord(const Record record);
@@ -186,6 +204,9 @@ private:
   StorageDelegate * m_delegate;
   mutable Record m_lastRecordRetrieved;
   mutable char * m_lastRecordRetrievedPointer;
+  bool m_quarantine;
+  int m_examNumber;
+  char m_fullNameBuffer[k_fullNameMaxSize];
 };
 
 /* Some apps memoize records and need to be notified when a record might have

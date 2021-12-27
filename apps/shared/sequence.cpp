@@ -14,6 +14,7 @@
 #include <string.h>
 #include <apps/i18n.h>
 #include <cmath>
+#include <ion/storage.h>
 
 using namespace Poincare;
 
@@ -315,7 +316,14 @@ void Sequence::rangeForDisplay(float * xMin, float * xMax, float * yMin, float *
 Sequence::RecordDataBuffer * Sequence::recordData() const {
   assert(!isNull());
   Ion::Storage::Record::Data d = value();
-  return reinterpret_cast<RecordDataBuffer *>(const_cast<void *>(d.buffer));
+  Sequence::RecordDataBuffer * buffer = reinterpret_cast<RecordDataBuffer *>(const_cast<void *>(d.buffer));
+  for (int i = 0; i < Shared::MaxNumberOfSequences; i++) {
+    if (Ion::Storage::strstr(fullName(), SequenceStore::k_sequenceNames[i])) {
+      buffer->setMyColor(Palette::DataColor[i]);
+      break;
+    }
+  }
+  return buffer;
 }
 
 /* Sequence Model */

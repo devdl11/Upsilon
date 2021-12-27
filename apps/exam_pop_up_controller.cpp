@@ -17,6 +17,7 @@ ExamPopUpController::ExamPopUpController(ExamPopUpControllerDelegate * delegate)
         GlobalPreferences::sharedGlobalPreferences()->setExamMode(mode);
         AppsContainer * container = AppsContainer::sharedAppsContainer();
         if (mode == GlobalPreferences::ExamMode::Off) {
+          Ion::Storage::sharedStorage()->deactivateQuarantine();
           Ion::LED::setColor(KDColorBlack);
           Ion::LED::updateColorWithPlugAndCharge();
         } else {

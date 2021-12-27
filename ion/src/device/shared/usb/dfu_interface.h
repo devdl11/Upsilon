@@ -11,12 +11,9 @@
 #include <drivers/config/internal_flash.h>
 #include <drivers/config/external_flash.h>
 
-namespace Ion
-{
-namespace Device
-{
-namespace USB
-{
+namespace Ion {
+namespace Device {
+namespace USB {
 
 class DFUInterface : public Interface {
 
@@ -83,7 +80,7 @@ private:
   };
 
   enum class Status : uint8_t {
-    OK              = 0x00,
+    OK = 0x00,
     errTARGET       = 0x01,
     errFILE         = 0x02,
     errWRITE        = 0x03,
@@ -182,10 +179,10 @@ private:
   void leaveDFUAndReset(bool do_reset = true);
 
   /* Erase and Write state. After starting the erase of flash memory, the user
-   * can no longer leave DFU mode by pressing the Back key of the keyboard. This
-   * way, we prevent the user from interrupting a software download. After every
-   * software download, the calculator resets, which unlocks the "exit on
-   * pressing back". */
+  * can no longer leave DFU mode by pressing the Back key of the keyboard. This
+  * way, we prevent the user from interrupting a software download. After every
+  * software download, the calculator resets, which unlocks the "exit on
+  * pressing back". */
   void willErase() { m_isErasingAndWriting = true; }
   void resetFlashParameters() {
     m_lastMemoryType = -1;
@@ -210,7 +207,7 @@ private:
   uint8_t m_lastMemoryType; // -1: None; 0: internal; 1: external
   uint8_t m_lastPageErased; // -1 default value
   bool m_dfuUnlocked;
-  uint8_t m_dfuLevel; // 0: Upsilon only, 1: Omega-forked only, 2: No update
+  uint8_t m_dfuLevel;
 };
 
 }

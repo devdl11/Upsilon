@@ -78,6 +78,7 @@ protected:
     }
     bool isActive() const { return m_active; }
     void setActive(bool active) { m_active = active; }
+    void setMyColor(KDColor color) {m_color = color; }
   private:
 #if __EMSCRIPTEN__
     /* For emscripten memory representation, loads and stores must be aligned;

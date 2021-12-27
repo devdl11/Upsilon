@@ -13,7 +13,7 @@ using namespace Shared;
 
 namespace Settings {
 
-UsbInfoController::UsbInfoController(Responder *parentResponder):
+UsbInfoController::UsbInfoController(Responder *parentResponder) :
   GenericSubController(parentResponder),
   m_usbProtectionLevelController(this),
   m_contentView(&m_selectableTableView)
@@ -101,7 +101,7 @@ void UsbInfoController::willDisplayCellForIndex(HighlightCell *cell, int index) 
 
 void UsbInfoController::didEnterResponderChain(Responder *previousFirstResponder) {
   m_contentView.reload();
-  I18n::Message infoMessages[] = {I18n::Message::USBExplanation1, I18n::Message::USBExplanation2, I18n::Message::USBExplanation3};
+  I18n::Message infoMessages[] = {I18n::Message::USBExplanation1, I18n::Message::USBExplanation2,I18n::Message::USBExplanation3};
   m_contentView.setMessages(infoMessages, k_numberOfExplanationMessages);
 }
 }  
