@@ -90,8 +90,7 @@ void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transfer
   }
 }
 
-bool
-DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
+bool DFUInterface::processSetupInRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   if (Interface::processSetupInRequest(request, transferBuffer, transferBufferLength, transferBufferMaxLength)) {
     return true;
   }
@@ -136,8 +135,7 @@ bool DFUInterface::processDownloadRequest(uint16_t wLength, uint16_t *transferBu
   return true;
 }
 
-bool
-DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
+bool DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer, uint16_t *transferBufferLength, uint16_t transferBufferMaxLength) {
   if (m_state != State::dfuIDLE && m_state != State::dfuUPLOADIDLE) {
     m_ep0->stallTransaction();
     return false;
@@ -155,7 +153,15 @@ DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferBuffer
   } else {
     /* We decided to never protect Read operation. Else we would have to check
      * here it is not protected before reading. */
+    
+    // Compute the reading address
+    uint32_t readAddress = (request->wValue() - 2) * Endpoint0::MaxTransferSize + m_addressPointer;
+    // Copy the requested memory zone into the transfer buffer.
+    uint16_t copySize = minUint32T(transferBufferMaxLength, request->wLength());
+    memcpy(transferBuffer, (void *)readAddress, copySize);
+    *transferBufferLength = copySize;
   }
+  m_state = State::dfuUPLOADIDLE;
   return true;
 }
 
