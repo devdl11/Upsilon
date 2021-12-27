@@ -16,7 +16,7 @@ class Storage {
 public:
   typedef uint16_t record_size_t;
 
-  constexpr static size_t k_storageSize = 63996;
+  constexpr static size_t k_storageSize = 63964;
   constexpr static size_t k_fullNameMaxSize = 220 + 5;
   constexpr static size_t k_extensionMaxSize = 10;
   static_assert(UINT16_MAX >= k_storageSize, "record_size_t not big enough");
