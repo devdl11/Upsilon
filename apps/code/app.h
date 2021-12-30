@@ -76,6 +76,7 @@ public:
   VariableBoxController * variableBoxController() { return &m_variableBoxController; }
 
   static constexpr int k_pythonHeapSize = 67000;
+  static constexpr char functionSuffix[] = ".function";
 
 private:
   /* Python delegate:

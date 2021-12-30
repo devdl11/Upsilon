@@ -9,6 +9,8 @@ extern "C" {
 
 namespace Code {
 
+constexpr char App::functionSuffix[];
+
 const ToolboxMessageTree forLoopChildren[] = {
   ToolboxMessageTree::Leaf(I18n::Message::ForInRange1ArgLoopWithArg, I18n::Message::Default, false, I18n::Message::ForInRange1ArgLoop),
   ToolboxMessageTree::Leaf(I18n::Message::ForInRange2ArgsLoopWithArg, I18n::Message::Default, false, I18n::Message::ForInRange2ArgsLoop),
@@ -719,6 +721,11 @@ bool PythonToolbox::selectLeaf(int selectedRow) {
     editedText = strippedEditedText;
   }
   sender()->handleEventWithText(editedText, true);
+  int suffixLen = strlen(App::functionSuffix);
+  const char * label = I18n::translate(node->label());
+  if (strlen(label) > suffixLen && strcmp(label + strlen(label) - suffixLen, App::functionSuffix) == 0) {
+    return true;
+  }
   Container::activeApp()->dismissModalViewController();
   return true;
 }
