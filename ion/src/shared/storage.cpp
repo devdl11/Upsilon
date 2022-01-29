@@ -9,7 +9,7 @@
 
 #if ION_STORAGE_LOG
 #include <stdio.h>
-#include<iostream>
+#include <iostream>
 #endif
 
 namespace Ion {
@@ -40,6 +40,8 @@ constexpr uint8_t Storage::seqMaxRecords;
 constexpr uint8_t Storage::eqMaxRecords;
 
 constexpr uint8_t Storage::noMaxRecords;
+
+constexpr const char * Storage::k_sequenceNames[seqMaxRecords];
 
 Storage * Storage::sharedStorage() {
   static Storage * storage = new (staticStorageArea) Storage();
@@ -882,8 +884,6 @@ void Storage::deactivateQuarantine() {
   #ifdef ION_STORAGE_LOG
   logMessage("deactivateQuarantine start");
   #endif
-  char availableNames[3] = {'u', 'v', 'w'};
-  
   for (int i = 0; i < count; i++) {
     for (char * p : *this) {
       const char * name = fullNameOfRecordStarting(p);
@@ -962,7 +962,7 @@ void Storage::deactivateQuarantine() {
         size_t originalSize;
         originalSize = strlen(originalNameP) - strlen(originalNameP + strlen(originalNameP) - strlen(dotChar));
         strlcpy(extension, originalNameP + originalSize, k_extensionMaxSize);
-        setFullNameBufferWithPrefix(&availableNames[i], extension);
+        setFullNameBufferWithPrefix(&k_sequenceNames[i][0], extension);
         setFullNameOfRecord(r, m_fullNameBuffer, true);
         currentIndex = 0;
         break;

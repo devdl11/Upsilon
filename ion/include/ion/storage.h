@@ -37,6 +37,14 @@ public:
 
   static constexpr uint8_t noMaxRecords = -1;
 
+
+  /* TODO
+   * Replace k_sequenceNames from sequence_store.h with this one
+   * */
+  static constexpr const char * k_sequenceNames[seqMaxRecords] = {
+          "u", "v", "w"
+  };
+
   class Record {
     /* A Record is identified by the CRC32 on its fullName because:
      * - A record is identified by its fullName, which is unique
