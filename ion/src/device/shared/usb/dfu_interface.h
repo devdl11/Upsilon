@@ -11,9 +11,12 @@
 #include <drivers/config/internal_flash.h>
 #include <drivers/config/external_flash.h>
 
-namespace Ion {
-namespace Device {
-namespace USB {
+namespace Ion
+{
+namespace Device
+{
+namespace USB
+{
 
 class DFUInterface : public Interface {
 
@@ -207,7 +210,7 @@ private:
   uint8_t m_lastMemoryType; // -1: None; 0: internal; 1: external
   uint8_t m_lastPageErased; // -1 default value
   bool m_dfuUnlocked;
-  uint8_t m_dfuLevel;
+  uint8_t m_dfuLevel; // 0: Upsilon only, 1: Omega-forked only, 2: No update
 };
 
 }

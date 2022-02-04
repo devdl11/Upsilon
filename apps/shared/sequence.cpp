@@ -319,7 +319,7 @@ Sequence::RecordDataBuffer * Sequence::recordData() const {
   Sequence::RecordDataBuffer * buffer = reinterpret_cast<RecordDataBuffer *>(const_cast<void *>(d.buffer));
   for (int i = 0; i < Shared::MaxNumberOfSequences; i++) {
     if (Ion::Storage::strstr(fullName(), SequenceStore::k_sequenceNames[i])) {
-      buffer->setMyColor(Palette::DataColor[i]);
+      buffer->setGraphColor(Palette::DataColor[i]);
       break;
     }
   }

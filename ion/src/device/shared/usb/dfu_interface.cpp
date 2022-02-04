@@ -78,7 +78,6 @@ void DFUInterface::wholeDataSentCallback(SetupPacket *request, uint8_t *transfer
       // Leave DFU routine: Leave DFU, reset device, jump to application code
       leaveDFUAndReset();
     } else if (m_state == State::dfuDNBUSY) {
-      m_state = State::dfuDNBUSY;
       if (m_largeBufferLength != 0) {
         // Here, copy the data from the transfer buffer to the flash memory
         writeOnMemory();
@@ -153,7 +152,6 @@ bool DFUInterface::processUploadRequest(SetupPacket *request, uint8_t *transferB
   } else {
     /* We decided to never protect Read operation. Else we would have to check
      * here it is not protected before reading. */
-    
     // Compute the reading address
     uint32_t readAddress = (request->wValue() - 2) * Endpoint0::MaxTransferSize + m_addressPointer;
     // Copy the requested memory zone into the transfer buffer.
@@ -189,7 +187,7 @@ void DFUInterface::changeAddressPointerIfNeeded() {
 
 void DFUInterface::eraseCommand(uint8_t *transferBuffer, uint16_t transferBufferLength) {
   /* We determine whether the commands asks for a mass erase or which sector to
- * erase. The erase must be done after the next getStatus request. */
+   * erase. The erase must be done after the next getStatus request. */
   m_state = State::dfuDNLOADSYNC;
 
   if (transferBufferLength == 1) {
@@ -218,6 +216,7 @@ void DFUInterface::eraseMemoryIfNeeded() {
   if (m_erasePage < 0) {
     return;
   }
+  
   willErase();
 
   #if 0 // We don't erase now the flash memory to avoid crash if writing is refused

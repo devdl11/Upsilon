@@ -245,7 +245,7 @@ void __attribute__((noinline)) start() {
   Ion::Device::Board::initFPU();
 
   /* Call static C++ object constructors
-   * The C++ compiler creates an initialization function   for each static object.
+   * The C++ compiler creates an initialization function for each static object.
    * The linker then stores the address of each of those functions consecutively
    * between _init_array_start and _init_array_end. So to initialize all C++
    * static objects we just have to iterate between theses two addresses and
