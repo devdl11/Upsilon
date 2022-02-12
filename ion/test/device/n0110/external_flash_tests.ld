@@ -11,7 +11,8 @@
 
 MEMORY {
   INTERNAL_FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 64K
-  SRAM (rw)  : ORIGIN = 0x20000000, LENGTH = 256K
+  SRAM (rw)  : ORIGIN = 0x20000000, LENGTH = 256K - 0xfa18
+  NOINIT (rw) : ORIGIN = 0x20000000 + 256K - 0xfa18, LENGTH = 0xfa18
 }
 
 STACK_SIZE = 32K;
@@ -86,7 +87,10 @@ SECTIONS {
      * Before execution, crt0 will erase that section of memory though, so we'll
      * need pointers to the beginning and end of this section. */
     . = ALIGN(4);
-    _bss_section_start_ram = .;
+    /* _bss_records_section_start = .;
+    *(.bss._ZN3Ion17staticStorageAreaE)
+    _bss_records_section_end = .;*/
+    _bss_section_start_ram = .; 
     *(.bss)
     *(.bss.*)
     /* The compiler may choose to allocate uninitialized global variables as
@@ -109,5 +113,14 @@ SECTIONS {
     . = ALIGN(8);
     _stack_start = .;
   } >SRAM
+
+  .noinit (NOLOAD) : {
+    . = ALIGN(4);
+    _bss_records_section_start = .;
+    KEEP(*(.noinit))
+    KEEP(*(.noinit*))
+    _bss_records_section_end = .;
+  } >NOINIT
+
 }
 

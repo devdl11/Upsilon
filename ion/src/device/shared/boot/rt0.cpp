@@ -30,6 +30,8 @@ extern "C" {
 extern char _data_section_start_flash;
 extern char _data_section_start_ram;
 extern char _data_section_end_ram;
+extern char _bss_records_section_start;
+extern char _bss_records_section_end;
 extern char _bss_section_start_ram;
 extern char _bss_section_end_ram;
 extern cxx_constructor _init_array_start;
@@ -235,6 +237,16 @@ void __attribute__((noinline)) start() {
   size_t dataSectionLength = (&_data_section_end_ram - &_data_section_start_ram);
   memcpy(&_data_section_start_ram, &_data_section_start_flash, dataSectionLength);
 
+  uint32_t Magic = 0xEE0BDDBA;
+  uint32_t readed;
+  memcpy(&readed, (void*)(_bss_records_section_start), sizeof(Magic));
+  int result = memcmp(&_bss_records_section_start, &Magic, sizeof(Magic));
+  if (result != 0 && readed != Magic) {
+    size_t bssRecordsSectionLength = (&_bss_records_section_end - &_bss_records_section_start);
+    // memset(&_bss_records_section_start, 0, bssRecordsSectionLength);
+    // memset(&_bss_records_section_start+sizeof(uint32_t), 0xFFFFFFFF, sizeof(uint32_t));
+  }
+  // memset(&_bss_records_section_start+sizeof(uint32_t), 0xFFFFFFEF, sizeof(uint32_t));
   /* Zero-out the bss section in RAM
    * Until we do, any uninitialized global variable will be unusable. */
   size_t bssSectionLength = (&_bss_section_end_ram - &_bss_section_start_ram);

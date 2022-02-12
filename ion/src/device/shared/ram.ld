@@ -76,6 +76,12 @@ SECTIONS {
     _stack_start = .;
   } >RAM_BUFFER
 
+  .noinit (NOLOAD) : {
+    . = ALIGN(4);
+    KEEP(*(.noinit))
+    KEEP(*(.noinit*))
+  } >RAM_BUFFER
+
   .phony : {
     /* We won't do dynamic memory allocation */
     _heap_start = .;
@@ -84,5 +90,7 @@ SECTIONS {
     _data_section_start_flash = .;
     _data_section_start_ram = .;
     _data_section_end_ram = .;
+    _bss_records_section_start = .;
+    _bss_records_section_end = .;
   } >RAM_BUFFER
 }

@@ -11,7 +11,8 @@
 
 MEMORY {
   INTERNAL_FLASH (rx) : ORIGIN = 0x00200000, LENGTH = 64K
-  SRAM (rw)  : ORIGIN = 0x20000000, LENGTH = 256K
+  SRAM (rw)  : ORIGIN = 0x20000000, LENGTH = 256K - 0xfa18
+  NOINIT (rw) : ORIGIN = 0x20000000 + 256K - 0xfa18, LENGTH = 0xfa18
   EXTERNAL_FLASH (rx) : ORIGIN = 0x90000000, LENGTH = 8M
   /*
   ITCM (rwx) : ORIGIN = 0x00000000, LENGTH = 16K
@@ -75,6 +76,7 @@ SECTIONS {
     *(.text.__assert)
     *(.text.memcpy)
     *(.text.memset)
+    *(.text.memcmp)
     /*
     *(.text.strlen)
     *(.text.strncmp)
@@ -346,7 +348,10 @@ SECTIONS {
      * Before execution, crt0 will erase that section of memory though, so we'll
      * need pointers to the beginning and end of this section. */
     . = ALIGN(4);
-    _bss_section_start_ram = .;
+    /* _bss_records_section_start = .;
+    *(.bss._ZN3Ion17staticStorageAreaE)
+    _bss_records_section_end = .; */
+    _bss_section_start_ram = .; 
     *(.bss)
     *(.bss.*)
     /* The compiler may choose to allocate uninitialized global variables as
@@ -369,6 +374,14 @@ SECTIONS {
     . = ALIGN(8);
     _stack_start = .;
   } >SRAM
+
+  .noinit (NOLOAD) : {
+    . = ALIGN(4);
+    _bss_records_section_start = .;
+    KEEP(*(.noinit))
+    KEEP(*(.noinit*))
+    _bss_records_section_end = .;
+  } >NOINIT
 
   /DISCARD/ : {
     /* exidx and extab are needed for unwinding, which we don't use */

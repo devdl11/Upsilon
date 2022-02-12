@@ -20,7 +20,11 @@ namespace Ion {
  * around both issues by creating a global staticStorageArea buffer, and by
  * placement-newing the Storage into that area on first use. */
 
-uint32_t staticStorageArea[sizeof(Storage)/sizeof(uint32_t)] = {0};
+extern "C" {
+  extern char _bss_records_section_start;
+}
+
+uint32_t staticStorageArea[sizeof(Storage)/sizeof(uint32_t)] __attribute__((section (".noinit")));
 
 constexpr char Storage::expExtension[];
 constexpr char Storage::funcExtension[];
@@ -28,7 +32,7 @@ constexpr char Storage::seqExtension[];
 constexpr char Storage::eqExtension[];
 
 Storage * Storage::sharedStorage() {
-  static Storage * storage = new (staticStorageArea) Storage();
+  static Storage * storage = new (staticStorageArea)Storage();
   return storage;
 }
 
@@ -333,7 +337,7 @@ Storage::Storage() :
   assert(m_magicHeader == Magic);
   assert(m_magicFooter == Magic);
   // Set the size of the first record to 0
-  overrideSizeAtPosition(m_buffer, 0);
+  // overrideSizeAtPosition(m_buffer, 0);
 }
 
 const char * Storage::fullNameOfRecord(const Record record) {
