@@ -486,7 +486,7 @@ bool TextField::privateHandleSelectEvent(Ion::Events::Event event) {
   return false;
 }
 
-bool TextField::handleEventWithText(const char * eventText, bool indentation, bool forceCursorRightOfText) {
+bool TextField::handleEventWithText(const char * eventText, bool indentation, bool forceCursorRightOfText, bool replaceLastCaracterWith) {
   size_t previousTextLength = strlen(text());
 
   if (!isEditing()) {
@@ -518,6 +518,10 @@ bool TextField::handleEventWithText(const char * eventText, bool indentation, bo
     // Replace System parentheses (used to keep layout tree structure) by normal parentheses
     Poincare::SerializationHelper::ReplaceSystemParenthesesByUserParentheses(buffer);
 
+    if (replaceLastCaracterWith) {
+      setCursorLocation(cursorLocation() - 1);
+    }
+
     if (insertTextAtLocation(buffer, const_cast<char *>(cursorLocation()))) {
       /* The cursor position depends on the text as we sometimes want to position
        * the cursor at the end of the text and sometimes after the first
@@ -529,6 +533,10 @@ bool TextField::handleEventWithText(const char * eventText, bool indentation, bo
         nextCursorLocation+= TextInputHelpers::CursorPositionInCommand(eventText) - eventText;
       }
       setCursorLocation(nextCursorLocation);
+    } else {
+      if (replaceLastCaracterWith) {
+        setCursorLocation(cursorLocation() + 1);
+      }
     }
   }
   return m_delegate->textFieldDidHandleEvent(this, true, strlen(text()) != previousTextLength);

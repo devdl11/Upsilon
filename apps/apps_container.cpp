@@ -7,6 +7,7 @@
 #include <poincare/exception_checkpoint.h>
 #include <ion/backlight.h>
 #include <poincare/preferences.h>
+#include "shared/keyboard_xnt.h"
 
 #include <algorithm>
 
@@ -37,7 +38,8 @@ AppsContainer::AppsContainer() :
   m_homeSnapshot(),
   m_onBoardingSnapshot(),
   m_hardwareTestSnapshot(),
-  m_usbConnectedSnapshot()
+  m_usbConnectedSnapshot(),
+  m_keyboardXnt()
 {
   m_emptyBatteryWindow.setFrame(KDRect(0, 0, Ion::Display::Width, Ion::Display::Height), false);
 // #if __EMSCRIPTEN__

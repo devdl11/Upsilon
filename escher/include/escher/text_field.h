@@ -34,7 +34,7 @@ public:
   void setText(const char * text);
   void setEditing(bool isEditing) override { m_contentView.setEditing(isEditing); }
   CodePoint XNTCodePoint(CodePoint defaultXNTCodePoint) override;
-  bool handleEventWithText(const char * text, bool indentation = false, bool forceCursorRightOfText = false) override;
+  bool handleEventWithText(const char * text, bool indentation = false, bool forceCursorRightOfText = false, bool replaceLastCaracterWith = false) override;
   bool handleEvent(Ion::Events::Event event) override;
   constexpr static int maxBufferSize() {
      return ContentView::k_maxBufferSize;

@@ -409,14 +409,14 @@ bool PythonTextArea::handleEvent(Ion::Events::Event event) {
   return result;
 }
 
-bool PythonTextArea::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText) {
+bool PythonTextArea::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText, bool replaceLastCaracterWith) {
   if (*text == 0) {
     return false;
   }
   if (m_contentView.isAutocompleting()) {
     removeAutocompletion();
   }
-  bool result = TextArea::handleEventWithText(text, indentation, forceCursorRightOfText);
+  bool result = TextArea::handleEventWithText(text, indentation, forceCursorRightOfText, replaceLastCaracterWith);
   addAutocompletion();
   return result;
 }

@@ -13,6 +13,7 @@ app_shared_test_src = $(addprefix apps/shared/,\
   global_context.cpp \
   interactive_curve_view_range.cpp \
   interactive_curve_view_range_delegate.cpp \
+  keyboard_xnt.cpp \
   labeled_curve_view.cpp \
   memoized_curve_view_range.cpp \
   range_1D.cpp \
@@ -36,7 +37,7 @@ app_shared_src = $(addprefix apps/shared/,\
   float_parameter_controller.cpp \
   function_app.cpp \
   function_banner_delegate.cpp \
-  function_curve_parameter_controller.cpp \
+  function_curve_parameter_controller.cpp \
   function_expression_cell.cpp \
   function_graph_controller.cpp \
   function_graph_view.cpp \
@@ -53,6 +54,7 @@ app_shared_src = $(addprefix apps/shared/,\
   interactive_curve_view_controller.cpp \
   interval.cpp \
   interval_parameter_controller.cpp \
+  keyboard_xnt.cpp \
   layout_field_delegate.cpp \
   list_parameter_controller.cpp \
   localization_controller.cpp \

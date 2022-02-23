@@ -355,7 +355,7 @@ void LayoutField::reload(KDSize previousSize) {
   markRectAsDirty(bounds());
 }
 
-bool LayoutField::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText) {
+bool LayoutField::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText, bool replaceLastCaracterWith) {
   /* The text here can be:
    * - the result of a key pressed, such as "," or "cos(•)"
    * - the text added after a toolbox selection

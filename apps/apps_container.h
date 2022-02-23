@@ -18,6 +18,7 @@
 #include "shared/global_context.h"
 #include "clock_timer.h"
 #include "on_boarding/prompt_controller.h"
+#include "shared/keyboard_xnt.h"
 
 #include <ion/events.h>
 
@@ -55,6 +56,7 @@ public:
   // Ion::StorageDelegate
   void storageDidChangeForRecord(const Ion::Storage::Record record) override;
   void storageIsFull() override;
+  Shared::Keyboard_XNT * getKeyboardXNT() { return &m_keyboardXnt; }
 protected:
   Home::App::Snapshot * homeAppSnapshot() { return &m_homeSnapshot; }
 private:
@@ -84,6 +86,7 @@ private:
   OnBoarding::App::Snapshot m_onBoardingSnapshot;
   HardwareTest::App::Snapshot m_hardwareTestSnapshot;
   USB::App::Snapshot m_usbConnectedSnapshot;
+  Shared::Keyboard_XNT m_keyboardXnt;
 };
 
 #endif
