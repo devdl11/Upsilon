@@ -69,9 +69,11 @@ bool TextFieldDelegateApp::fieldDidReceiveEvent(EditableField * field, Responder
     Keyboard_XNT * keyboard = AppsContainer::sharedAppsContainer()->getKeyboardXNT();
     bool isToggling = keyboard->isToggling();
     Keyboard_XNT::XNT_KEY result = keyboard->handleEvent(event, Shared::Keyboard_XNT::AppsKeys::POINCARE);
-    const char buffer = result.getKey();
-    return field->handleEventWithText(&buffer, false, false, isToggling);
-  } else {
+    assert(result != Keyboard_XNT::OK_KEY());
+    const char * buffer = result.getKey();
+    return field->handleEventWithText(buffer, false, false, isToggling);
+  } else if (AppsContainer::sharedAppsContainer()->getKeyboardXNT()->isToggling()) {
+
     AppsContainer::sharedAppsContainer()->getKeyboardXNT()->reset();
   }
   return false;

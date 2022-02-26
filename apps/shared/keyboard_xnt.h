@@ -8,41 +8,62 @@ namespace Shared {
 
 class Keyboard_XNT {
 public:
-  static const unsigned long k_KEYS = 5;
-  static constexpr char k_X = 'x';
-  static constexpr char k_N = 'n';
-  static constexpr char k_T = 't';
+  static const unsigned long k_KEYS = 4;
+  static constexpr char k_X[] = "x";
+  static constexpr char k_N[] = "n";
+  static constexpr char k_T[] = "t";
+  static constexpr char k_THETA[] = "θ";
 
   class XNT_KEY {
   public:
-    explicit XNT_KEY(const char key) : m_key(key) {}
+    explicit XNT_KEY(const char * key) : m_key(key) {}
 
-    char getKey() const { return m_key; }
+    const char * getKey() const { return m_key; }
   private:
-    const char m_key;
+    const char * m_key;
   };
 
   enum AppsKeys {
-    PYTHON=0,
-    CALC=0,
-    FUNCTION=0,
-    SEQUENCE=1,
-    DEFAULT=0,
-    POINCARE=0,
-    NONE=-1
+    PYTHON,
+    CALC,
+    FUNCTION,
+    SEQUENCE,
+    DEFAULT,
+    POINCARE,
+    NONE
   };
 
-  static const XNT_KEY X_KEY() { return XNT_KEY(k_X); };
-  static const XNT_KEY N_KEY() { return XNT_KEY(k_N); };
-  static const XNT_KEY T_KEY() { return XNT_KEY(k_T); };
-  static const XNT_KEY O_KEY() { return XNT_KEY(UCodePointGreekSmallLetterTheta); };
-  static const XNT_KEY OK_KEY() { return XNT_KEY(UCodePointNull); };
+  class AppIndex {
+  public:
+    explicit AppIndex(int index, AppsKeys app) : m_index(index), m_app(app) {}
+
+    int getIndex() const { return m_index; }
+    AppsKeys getApp() const { return m_app; }
+
+  private:
+    const int m_index;
+    const AppsKeys m_app;
+  };
+
+  static XNT_KEY X_KEY() { return XNT_KEY(k_X); };
+  static XNT_KEY N_KEY() { return XNT_KEY(k_N); };
+  static XNT_KEY T_KEY() { return XNT_KEY(k_T); };
+  static XNT_KEY O_KEY() { return XNT_KEY(k_THETA); };
+  static XNT_KEY OK_KEY() { return XNT_KEY(nullptr); };
+
+  static AppIndex PythonApp() { return AppIndex(0, AppsKeys::PYTHON); }
+  static AppIndex CalcApp() { return AppIndex(0, AppsKeys::CALC); }
+  static AppIndex FunctionApp() { return AppIndex(0, AppsKeys::FUNCTION); }
+  static AppIndex SequenceApp() { return AppIndex(1, AppsKeys::SEQUENCE); }
+  static AppIndex DefaultApp() { return AppIndex(0, AppsKeys::DEFAULT); }
+  static AppIndex PoincareSys() { return AppIndex(0, AppsKeys::POINCARE); }
+
+  static AppIndex getAppIndexByApp(AppsKeys app);
 
   Keyboard_XNT() : m_toggle(false), m_index(0), m_previous(AppsKeys::NONE) {}
 
   XNT_KEY handleEvent(Ion::Events::Event event, AppsKeys app);
 
-  void setIndex(int i) { m_index = i; }
   int getIndex() const {return m_index; }
   bool isToggling() const { return m_toggle; }
   XNT_KEY getKeyByIndex(int i);
@@ -56,4 +77,4 @@ private:
 
 }
 
-#endif //LAURYUPSILON_KEYBOARD_XNT_H
+#endif //LAURY UPSILON_KEYBOARD_XNT_H

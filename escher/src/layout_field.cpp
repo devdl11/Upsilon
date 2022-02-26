@@ -384,6 +384,10 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
   }
 
   Poincare::LayoutCursor * cursor = m_contentView.cursor();
+
+  if (replaceLastCaracterWith) {
+    cursor->setPosition(cursor->position());
+  }
   // Handle special cases
   if (strcmp(text, Ion::Events::Division.text()) == 0) {
     cursor->addFractionLayoutAndCollapseSiblings();
