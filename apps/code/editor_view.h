@@ -39,28 +39,24 @@ private:
 
   class GutterView : public View {
   public:
-    GutterView(const KDFont * font, PythonTextArea * text, EditorView * editor) : View(), m_font(font), m_offset(0), m_textArea(text), m_editorView(editor), m_lines(0), m_digits(3) {}
+    GutterView(const KDFont * font) : View(), m_font(font), m_offset(0), m_digits(3), m_previousDigits(0) {}
 
     void drawRect(KDContext * ctx, KDRect rect) const override;
     void setOffset(KDCoordinate offset);
-    KDSize minimalSizeForOptimalDisplay() const override;
 
-    KDSize minimalSizeForOptimalDisplayComputed();
-    int numberOfLines();
-    int getLineDigits(bool actualize = false);
+    KDSize widthComputed();
+    void loadMaxDigits();
+    bool isEditorReloadNeeded();
 
     static int getDigits(int value);
 
   private:
     static constexpr KDCoordinate k_margin = 2;
-    static constexpr int k_lineNumberCharLength = 3;
 
     const KDFont * m_font;
     KDCoordinate m_offset;
-    PythonTextArea * m_textArea;
-    EditorView * m_editorView;
-    int m_lines;
     int m_digits;
+    int m_previousDigits;
   };
 
   PythonTextArea m_textArea;
