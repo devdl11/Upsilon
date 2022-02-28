@@ -1,5 +1,7 @@
 #include <assert.h>
 #include "keyboard_xnt.h"
+#include "../../escher/include/escher/container.h"
+#include "../../escher/include/escher/app.h"
 
 using namespace Shared;
 
@@ -8,7 +10,9 @@ constexpr char Shared::Keyboard_XNT::k_N[];
 constexpr char Shared::Keyboard_XNT::k_T[];
 constexpr char Shared::Keyboard_XNT::k_THETA[];
 
-Shared::Keyboard_XNT::XNT_KEY Shared::Keyboard_XNT::handleEvent(Ion::Events::Event event, Shared::Keyboard_XNT::AppsKeys app) {
+Shared::Keyboard_XNT::XNT_KEY Shared::Keyboard_XNT::handleEvent(Ion::Events::Event event) {
+  App * currentApp = Container::activeApp();
+  AppsKeys app = currentApp->getAppKey();
   if (app != m_previous) {
     reset();
     m_previous = app;
@@ -19,12 +23,14 @@ Shared::Keyboard_XNT::XNT_KEY Shared::Keyboard_XNT::handleEvent(Ion::Events::Eve
       return OK_KEY();
     }
     m_index = m_index >= k_KEYS - 1 ? 0 : m_index + 1;
+    m_handle = false;
     return getKeyByIndex(m_index);
   } else {
     if (event != Ion::Events::XNT) {
       return OK_KEY();
     }
     m_toggle = !m_toggle;
+    m_handle = true;
     m_index = getAppIndexByApp(app).getIndex();
     return getKeyByIndex(m_index);
   }
@@ -46,6 +52,7 @@ Shared::Keyboard_XNT::XNT_KEY Shared::Keyboard_XNT::getKeyByIndex(int i) {
 }
 
 void Shared::Keyboard_XNT::reset() {
+  m_reset = m_toggle;
   m_toggle = false;
   m_index = 0;
   m_previous = AppsKeys::NONE;

@@ -78,4 +78,8 @@ NestedMenuController * App::variableBoxForInputEventHandler(InputEventHandler * 
   return varBox;
 }
 
+Shared::Keyboard_XNT::AppsKeys App::getAppKey() {
+  return Shared::Keyboard_XNT::AppsKeys::SEQUENCE;
+}
+
 }

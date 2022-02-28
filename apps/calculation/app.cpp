@@ -85,4 +85,8 @@ void App::willBecomeInactive() {
   Shared::ExpressionFieldDelegateApp::willBecomeInactive();
 }
 
+Keyboard_XNT::AppsKeys App::getAppKey() {
+  return Shared::Keyboard_XNT::AppsKeys::CALC;
+}
+
 }

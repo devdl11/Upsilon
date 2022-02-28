@@ -17,6 +17,10 @@ App::App(Snapshot * snapshot) :
 {
 }
 
+Shared::Keyboard_XNT::AppsKeys App::getAppKey() {
+  return Shared::Keyboard_XNT::DEFAULT;
+}
+
 App::WizardViewController::WizardViewController(Responder * parentResponder) :
   BankViewController(parentResponder),
   m_batteryTestController(this),

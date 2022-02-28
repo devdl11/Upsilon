@@ -45,6 +45,8 @@ public:
   // TextFieldDelegateApp
   bool isAcceptableExpression(const Poincare::Expression expression) override;
 
+  Shared::Keyboard_XNT::AppsKeys getAppKey() override;
+
 private:
   App(Snapshot * snapshot);
   HistoryController m_historyController;

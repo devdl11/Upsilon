@@ -59,6 +59,9 @@ public:
   InputViewController * inputViewController() override {
     return &m_inputViewController;
   }
+
+  Shared::Keyboard_XNT::AppsKeys getAppKey() override;
+
 private:
   App(Snapshot * snapshot);
   ListController m_listController;

@@ -11,6 +11,7 @@
 #include <ion/storage.h>
 #include <poincare/context.h>
 #include <escher/telemetry.h>
+#include "apps/shared/keyboard_xnt.h"
 
 /* An app is fed events and outputs drawing calls.
  *
@@ -72,19 +73,24 @@ public:
   virtual int numberOfTimers() { return 0; }
   virtual Timer * timerAtIndex(int i) { assert(false); return nullptr; }
   virtual Poincare::Context * localContext() { return nullptr; }
+  // App key for Keyboard XNT
+  virtual Shared::Keyboard_XNT::AppsKeys getAppKey() { return m_appKey; }
+
 protected:
-  App(Snapshot * snapshot, ViewController * rootViewController, I18n::Message warningMessage = (I18n::Message)0) :
+  App(Snapshot * snapshot, ViewController * rootViewController, I18n::Message warningMessage = (I18n::Message)0, Shared::Keyboard_XNT::AppsKeys appKey = Shared::Keyboard_XNT::AppsKeys::DEFAULT) :
     Responder(nullptr),
     m_modalViewController(this, rootViewController),
     m_firstResponder(nullptr),
     m_snapshot(snapshot),
-    m_warningController(this, warningMessage)
+    m_warningController(this, warningMessage),
+    m_appKey(appKey)
   {}
   ModalViewController m_modalViewController;
 private:
   Responder * m_firstResponder;
   Snapshot * m_snapshot;
   WarningController m_warningController;
+  Shared::Keyboard_XNT::AppsKeys m_appKey;
 };
 
 #endif

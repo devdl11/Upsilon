@@ -89,4 +89,8 @@ NestedMenuController * App::variableBoxForInputEventHandler(InputEventHandler * 
   return varBox;
 }
 
+Keyboard_XNT::AppsKeys App::getAppKey() {
+  return Keyboard_XNT::AppsKeys::FUNCTION;
+}
+
 }

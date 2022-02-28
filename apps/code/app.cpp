@@ -151,4 +151,8 @@ void App::deinitPython() {
   }
 }
 
+Shared::Keyboard_XNT::AppsKeys App::getAppKey() {
+  return Shared::Keyboard_XNT::AppsKeys::PYTHON;
+}
+
 }

@@ -77,6 +77,7 @@ public:
 
   static constexpr int k_pythonHeapSize = 67000;
 
+  Shared::Keyboard_XNT::AppsKeys getAppKey() override;
 private:
   /* Python delegate:
    * MicroPython requires a heap. To avoid dynamic allocation, we keep a working

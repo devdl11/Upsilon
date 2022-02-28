@@ -12,6 +12,7 @@
 #include "serial_number_controller.h"
 #include "vblank_test_controller.h"
 #include "../shared/shared_app.h"
+#include "../shared/keyboard_xnt.h"
 
 namespace HardwareTest {
 
@@ -22,6 +23,7 @@ public:
     App * unpack(Container * container) override;
     Descriptor * descriptor() override;
   };
+  Shared::Keyboard_XNT::AppsKeys getAppKey();
 private:
   class WizardViewController : public BankViewController {
   public:

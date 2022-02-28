@@ -55,6 +55,9 @@ public:
   ValuesController * valuesController() override {
     return &m_valuesController;
   }
+
+  Shared::Keyboard_XNT::AppsKeys getAppKey() override;
+
   InputViewController * inputViewController() override {
     return &m_inputViewController;
   }

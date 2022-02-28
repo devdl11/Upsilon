@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string.h>
 #include <algorithm>
+#include "apps/apps_container.h"
 
 using namespace Poincare;
 
@@ -367,6 +368,10 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
    * insertionCursor is invalidated. */
   m_contentView.invalidateInsertionCursor();
 
+  if (!replaceLastCaracterWith && AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustReset()) {
+    resetSelection();
+  }
+
   // Delete the selected layouts if needed
   deleteSelection();
 
@@ -385,9 +390,6 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
 
   Poincare::LayoutCursor * cursor = m_contentView.cursor();
 
-  if (replaceLastCaracterWith) {
-    cursor->setPosition(cursor->position());
-  }
   // Handle special cases
   if (strcmp(text, Ion::Events::Division.text()) == 0) {
     cursor->addFractionLayoutAndCollapseSiblings();
@@ -414,6 +416,15 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
       KDSize previousLayoutSize = minimalSizeForOptimalDisplay();
       cursor->insertText(text, forceCursorRightOfText);
       reload(previousLayoutSize);
+      if (replaceLastCaracterWith || AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustHandle()) {
+        Layout selection;
+        bool result;
+        LayoutCursor newCursor = cursor->selectAtDirection(Poincare::LayoutCursor::Direction::Left, &result, &selection);
+        if (!selection.isUninitialized()) {
+          m_contentView.addSelection(selection);
+//          m_contentView.setCursor(newCursor);
+        }
+      }
       return true;
     }
     // The text is parsable, we create its layout an insert it.
@@ -422,6 +433,15 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
       return true;
     }
     insertLayoutAtCursor(resultLayout, resultExpression, forceCursorRightOfText);
+    if (replaceLastCaracterWith || AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustHandle()) {
+      Layout selection;
+      bool result;
+      LayoutCursor newCursor = cursor->selectAtDirection(Poincare::LayoutCursor::Direction::Left, &result, &selection);
+      if (!selection.isUninitialized()) {
+        m_contentView.addSelection(selection);
+//        m_contentView.setCursor(newCursor);
+      }
+    }
   }
   return true;
 }

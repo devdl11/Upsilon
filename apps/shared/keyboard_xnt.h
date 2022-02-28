@@ -60,18 +60,22 @@ public:
 
   static AppIndex getAppIndexByApp(AppsKeys app);
 
-  Keyboard_XNT() : m_toggle(false), m_index(0), m_previous(AppsKeys::NONE) {}
+  Keyboard_XNT() : m_toggle(false), m_index(0), m_previous(AppsKeys::NONE), m_reset(false), m_handle(false) {}
 
-  XNT_KEY handleEvent(Ion::Events::Event event, AppsKeys app);
+  XNT_KEY handleEvent(Ion::Events::Event event);
 
   int getIndex() const {return m_index; }
   bool isToggling() const { return m_toggle; }
   XNT_KEY getKeyByIndex(int i);
   void reset();
+  bool didJustReset() const { return m_reset; }
+  bool didJustHandle() const { return m_handle; }
 
 private:
   bool m_toggle;
+  bool m_handle;
   int m_index;
+  bool m_reset;
   AppsKeys m_previous;
 };
 

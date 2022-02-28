@@ -3,6 +3,7 @@
 
 #include <escher.h>
 #include "main_controller.h"
+#include "../shared/keyboard_xnt.h"
 
 namespace External {
 
@@ -24,6 +25,8 @@ public:
   virtual void didBecomeActive(Window * window);
   int heapSize() { return k_externalHeapSize; }
   char * heap() { return m_externalHeap; }
+
+  Shared::Keyboard_XNT::AppsKeys getAppKey();
 private:
   App(Snapshot * snapshot);
   MainController m_mainController;
