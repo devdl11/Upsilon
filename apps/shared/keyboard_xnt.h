@@ -3,6 +3,7 @@
 
 #include "../../ion/include/ion/events.h"
 #include "../../ion/include/ion/unicode/code_point.h"
+#include "../../poincare/include/poincare/layout_cursor.h"
 
 namespace Shared {
 
@@ -30,6 +31,7 @@ public:
     SEQUENCE,
     DEFAULT,
     POINCARE,
+    STATISTICS,
     NONE
   };
 
@@ -57,6 +59,7 @@ public:
   static AppIndex SequenceApp() { return AppIndex(1, AppsKeys::SEQUENCE); }
   static AppIndex DefaultApp() { return AppIndex(0, AppsKeys::DEFAULT); }
   static AppIndex PoincareSys() { return AppIndex(0, AppsKeys::POINCARE); }
+  static AppIndex StatisticsApp() { return AppIndex(0, AppsKeys::STATISTICS); }
 
   static AppIndex getAppIndexByApp(AppsKeys app);
 
@@ -67,9 +70,12 @@ public:
   int getIndex() const {return m_index; }
   bool isToggling() const { return m_toggle; }
   XNT_KEY getKeyByIndex(int i);
-  void reset();
+  void startCleaning();
+  void finalizeCleaning();
   bool didJustReset() const { return m_reset; }
   bool didJustHandle() const { return m_handle; }
+  Poincare::LayoutCursor::Direction getSelectionDirection();
+  static bool isXNTKey(const char * buffer);
 
 private:
   bool m_toggle;

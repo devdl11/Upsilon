@@ -11,7 +11,7 @@
 
 namespace Graph {
 
-class ListController : public Shared::FunctionListController, public Shared::TextFieldDelegate {
+class ListController : public Shared::FunctionListController, public Shared::TextFieldDelegate, public View {
 public:
   ListController(Responder * parentResponder, ButtonRowController * header, ButtonRowController * footer, InputEventHandlerDelegate * inputEventHandlerDelegate);
   const char * title() override;
@@ -21,6 +21,7 @@ public:
   bool textFieldDidAbortEditing(TextField * textField) override;
   bool textFieldShouldFinishEditing(TextField * textField, Ion::Events::Event event) override;
   bool textFieldDidReceiveEvent(TextField * textField, Ion::Events::Event event) override;
+  bool handleEvent(Ion::Events::Event event) override;
 protected:
   virtual const char * recordExtension() const override { return Ion::Storage::funcExtension; }
 private:

@@ -356,7 +356,7 @@ void LayoutField::reload(KDSize previousSize) {
   markRectAsDirty(bounds());
 }
 
-bool LayoutField::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText, bool replaceLastCaracterWith) {
+bool LayoutField::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText) {
   /* The text here can be:
    * - the result of a key pressed, such as "," or "cos(•)"
    * - the text added after a toolbox selection
@@ -368,8 +368,12 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
    * insertionCursor is invalidated. */
   m_contentView.invalidateInsertionCursor();
 
-  if (!replaceLastCaracterWith && AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustReset()) {
+  if (!Shared::Keyboard_XNT::isXNTKey(text) && AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustReset()) {
     resetSelection();
+    AppsContainer::sharedAppsContainer()->getKeyboardXNT()->finalizeCleaning();
+  } else {
+    App * currentApp = Container::activeApp();
+    Shared::Keyboard_XNT::AppsKeys app = currentApp->getAppKey();
   }
 
   // Delete the selected layouts if needed
@@ -389,7 +393,6 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
   }
 
   Poincare::LayoutCursor * cursor = m_contentView.cursor();
-
   // Handle special cases
   if (strcmp(text, Ion::Events::Division.text()) == 0) {
     cursor->addFractionLayoutAndCollapseSiblings();
@@ -416,10 +419,10 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
       KDSize previousLayoutSize = minimalSizeForOptimalDisplay();
       cursor->insertText(text, forceCursorRightOfText);
       reload(previousLayoutSize);
-      if (replaceLastCaracterWith || AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustHandle()) {
+      if (Shared::Keyboard_XNT::isXNTKey(text)) {
         Layout selection;
         bool result;
-        LayoutCursor newCursor = cursor->selectAtDirection(Poincare::LayoutCursor::Direction::Left, &result, &selection);
+        LayoutCursor newCursor = cursor->selectAtDirection(AppsContainer::sharedAppsContainer()->getKeyboardXNT()->getSelectionDirection(), &result, &selection);
         if (!selection.isUninitialized()) {
           m_contentView.addSelection(selection);
 //          m_contentView.setCursor(newCursor);
@@ -433,10 +436,10 @@ bool LayoutField::handleEventWithText(const char * text, bool indentation, bool 
       return true;
     }
     insertLayoutAtCursor(resultLayout, resultExpression, forceCursorRightOfText);
-    if (replaceLastCaracterWith || AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustHandle()) {
+    if (Shared::Keyboard_XNT::isXNTKey(text)) {
       Layout selection;
       bool result;
-      LayoutCursor newCursor = cursor->selectAtDirection(Poincare::LayoutCursor::Direction::Left, &result, &selection);
+      LayoutCursor newCursor = cursor->selectAtDirection(AppsContainer::sharedAppsContainer()->getKeyboardXNT()->getSelectionDirection(), &result, &selection);
       if (!selection.isUninitialized()) {
         m_contentView.addSelection(selection);
 //        m_contentView.setCursor(newCursor);

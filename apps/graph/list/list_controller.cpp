@@ -11,6 +11,7 @@ namespace Graph {
 
 ListController::ListController(Responder * parentResponder, ButtonRowController * header, ButtonRowController * footer, InputEventHandlerDelegate * inputEventHandlerDelegate) :
   Shared::FunctionListController(parentResponder, header, footer, I18n::Message::AddFunction),
+  View(),
   m_functionTitleCells{ //TODO find better initialization
     TextFieldFunctionTitleCell(this),
     TextFieldFunctionTitleCell(this),
@@ -191,6 +192,27 @@ void ListController::setFunctionNameInTextField(ExpiringPointer<ContinuousFuncti
 
 ContinuousFunctionStore * ListController::modelStore() {
   return App::app()->functionStore();
+}
+
+bool ListController::handleEvent(Ion::Events::Event event) {
+  if (event == Ion::Events::XNT) {
+    Shared::Keyboard_XNT::XNT_KEY key = AppsContainer::sharedAppsContainer()->getKeyboardXNT()->handleEvent(event);
+    if (key.getKey() == Shared::Keyboard_XNT::N_KEY().getKey()) {
+      key = AppsContainer::sharedAppsContainer()->getKeyboardXNT()->handleEvent(event);
+    }
+    App * myApp = Graph::App::app();
+    Shared::ExpiringPointer<Shared::ContinuousFunction> function = myApp->functionStore()->modelForRecord(modelStore()->recordAtIndex(modelIndexForRow(selectedRow())));
+    if (key.getKey() == Shared::Keyboard_XNT::X_KEY().getKey()) {
+      function->setPlotType(ContinuousFunction::PlotType::Cartesian, Poincare::Preferences::sharedPreferences()->angleUnit(), myApp->localContext());
+    } else if (key.getKey() == Shared::Keyboard_XNT::T_KEY().getKey()) {
+      function->setPlotType(ContinuousFunction::PlotType::Parametric, Poincare::Preferences::sharedPreferences()->angleUnit(), myApp->localContext());
+    } else {
+      function->setPlotType(ContinuousFunction::PlotType::Polar, Poincare::Preferences::sharedPreferences()->angleUnit(), myApp->localContext());
+    }
+    markRectAsDirty(Shared::FunctionListController::view()->bounds());
+    return true;
+  }
+  return FunctionListController::handleEvent(event);
 }
 
 }

@@ -6,6 +6,7 @@
 #include <poincare/serialization_helper.h>
 #include <assert.h>
 #include <algorithm>
+#include "apps/apps_container.h"
 
 static char s_draftTextBuffer[TextField::maxBufferSize()];
 
@@ -486,7 +487,7 @@ bool TextField::privateHandleSelectEvent(Ion::Events::Event event) {
   return false;
 }
 
-bool TextField::handleEventWithText(const char * eventText, bool indentation, bool forceCursorRightOfText, bool replaceLastCaracterWith) {
+bool TextField::handleEventWithText(const char * eventText, bool indentation, bool forceCursorRightOfText) {
   size_t previousTextLength = strlen(text());
 
   if (!isEditing()) {
@@ -495,6 +496,11 @@ bool TextField::handleEventWithText(const char * eventText, bool indentation, bo
   }
 
   assert(isEditing());
+
+  if (!Shared::Keyboard_XNT::isXNTKey(eventText) && AppsContainer::sharedAppsContainer()->getKeyboardXNT()->didJustReset()) {
+    resetSelection();
+    AppsContainer::sharedAppsContainer()->getKeyboardXNT()->finalizeCleaning();
+  }
 
   // Delete the selected text if needed
   if (!contentView()->selectionIsEmpty()) {
@@ -517,11 +523,6 @@ bool TextField::handleEventWithText(const char * eventText, bool indentation, bo
     }
     // Replace System parentheses (used to keep layout tree structure) by normal parentheses
     Poincare::SerializationHelper::ReplaceSystemParenthesesByUserParentheses(buffer);
-
-    if (replaceLastCaracterWith) {
-      setCursorLocation(cursorLocation() - 1);
-    }
-
     if (insertTextAtLocation(buffer, const_cast<char *>(cursorLocation()))) {
       /* The cursor position depends on the text as we sometimes want to position
        * the cursor at the end of the text and sometimes after the first
@@ -533,9 +534,9 @@ bool TextField::handleEventWithText(const char * eventText, bool indentation, bo
         nextCursorLocation+= TextInputHelpers::CursorPositionInCommand(eventText) - eventText;
       }
       setCursorLocation(nextCursorLocation);
-    } else {
-      if (replaceLastCaracterWith) {
-        setCursorLocation(cursorLocation() + 1);
+      if (Shared::Keyboard_XNT::isXNTKey(eventText)) {
+        selectLeftRight(true, false);
+        setCursorLocation(nextCursorLocation + 1);
       }
     }
   }

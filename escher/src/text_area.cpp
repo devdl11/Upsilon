@@ -33,7 +33,7 @@ static inline void InsertSpacesAtLocation(int spacesCount, char * buffer, int bu
   }
 }
 
-bool TextArea::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText, bool replaceLastCaracterWith) {
+bool TextArea::handleEventWithText(const char * text, bool indentation, bool forceCursorRightOfText) {
   if (*text == 0) {
     return false;
   }
@@ -50,9 +50,6 @@ bool TextArea::handleEventWithText(const char * text, bool indentation, bool for
   int addedTextLength = strlen(text);
   size_t previousTextLength = contentView()->getText()->textLength();
   char * insertionPosition = const_cast<char *>(cursorLocation());
-  if (replaceLastCaracterWith) {
-    insertionPosition --;
-  }
   const char * textAreaBuffer = contentView()->text();
   if (indentation) {
     // Compute the indentation

@@ -14,7 +14,8 @@ Shared::Keyboard_XNT::XNT_KEY Shared::Keyboard_XNT::handleEvent(Ion::Events::Eve
   App * currentApp = Container::activeApp();
   AppsKeys app = currentApp->getAppKey();
   if (app != m_previous) {
-    reset();
+    startCleaning();
+    finalizeCleaning();
     m_previous = app;
   }
   if (m_toggle) {
@@ -29,7 +30,7 @@ Shared::Keyboard_XNT::XNT_KEY Shared::Keyboard_XNT::handleEvent(Ion::Events::Eve
     if (event != Ion::Events::XNT) {
       return OK_KEY();
     }
-    m_toggle = !m_toggle;
+    m_toggle = true;
     m_handle = true;
     m_index = getAppIndexByApp(app).getIndex();
     return getKeyByIndex(m_index);
@@ -51,8 +52,19 @@ Shared::Keyboard_XNT::XNT_KEY Shared::Keyboard_XNT::getKeyByIndex(int i) {
   }
 }
 
-void Shared::Keyboard_XNT::reset() {
-  m_reset = m_toggle;
+void Shared::Keyboard_XNT::startCleaning() {
+  if (m_reset) {
+    return;
+  }
+  m_reset = true;
+}
+
+void Shared::Keyboard_XNT::finalizeCleaning() {
+  if (!m_reset) {
+    return;
+  }
+  m_reset = false;
+  m_handle = false;
   m_toggle = false;
   m_index = 0;
   m_previous = AppsKeys::NONE;
@@ -74,4 +86,19 @@ Keyboard_XNT::AppIndex Keyboard_XNT::getAppIndexByApp(Keyboard_XNT::AppsKeys app
     default:
       return DefaultApp();
   }
+}
+
+bool Keyboard_XNT::isXNTKey(const char *buffer) {
+  return buffer == k_X || buffer == k_N || buffer == k_T || buffer == k_THETA;
+}
+
+Poincare::LayoutCursor::Direction Keyboard_XNT::getSelectionDirection() {
+  App * currentApp = Container::activeApp();
+  AppsKeys app = currentApp->getAppKey();
+  if (app == AppsKeys::STATISTICS) {
+    return Poincare::LayoutCursor::Direction::Right;
+  } else {
+    return Poincare::LayoutCursor::Direction::Left;
+  }
+
 }

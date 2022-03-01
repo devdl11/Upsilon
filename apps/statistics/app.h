@@ -35,6 +35,7 @@ public:
     int * selectedHistogramBarIndex() { return &m_selectedHistogramBarIndex; }
     int * selectedBoxSeriesIndex() { return &m_selectedBoxSeriesIndex; }
     BoxView::Quantile * selectedBoxQuantile() { return &m_selectedBoxQuantile; }
+
   private:
     Store m_store;
     uint32_t m_storeVersion;
@@ -46,6 +47,8 @@ public:
     BoxView::Quantile m_selectedBoxQuantile;
   };
   TELEMETRY_ID("Statistics");
+public:
+  Shared::Keyboard_XNT::AppsKeys getAppKey() override;
 private:
   App(Snapshot * snapshot, Poincare::Context * parentContext);
   CalculationController m_calculationController;
