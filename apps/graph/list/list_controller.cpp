@@ -209,7 +209,7 @@ bool ListController::handleEvent(Ion::Events::Event event) {
     } else {
       function->setPlotType(ContinuousFunction::PlotType::Polar, Poincare::Preferences::sharedPreferences()->angleUnit(), myApp->localContext());
     }
-    markRectAsDirty(Shared::FunctionListController::view()->bounds());
+    AppsContainer::sharedAppsContainer()->relaunchCurrentApp();
     return true;
   }
   return FunctionListController::handleEvent(event);

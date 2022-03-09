@@ -39,6 +39,16 @@ bool Container::switchTo(App::Snapshot * snapshot) {
   return true;
 }
 
+void Container::relaunchCurrentApp() {
+  if (s_activeApp) {
+    s_activeApp->willBecomeInactive();
+    s_activeApp->snapshot()->pack(s_activeApp);
+    s_activeApp->snapshot()->unpack(this);
+    s_activeApp->didBecomeActive(window());
+    window()->redraw();
+  }
+}
+
 bool Container::dispatchEvent(Ion::Events::Event event) {
   if (event == Ion::Events::TimerFire ) {
     window()->redraw();

@@ -31,6 +31,7 @@ public:
   virtual void run();
   virtual bool dispatchEvent(Ion::Events::Event event) override;
   virtual bool switchTo(App::Snapshot * snapshot);
+  virtual void relaunchCurrentApp();
 protected:
   virtual Window * window() = 0;
   static App * s_activeApp;

@@ -57,6 +57,7 @@ public:
   void storageDidChangeForRecord(const Ion::Storage::Record record) override;
   void storageIsFull() override;
   Shared::Keyboard_XNT * getKeyboardXNT() { return &m_keyboardXnt; }
+  void relaunchCurrentApp();
 protected:
   Home::App::Snapshot * homeAppSnapshot() { return &m_homeSnapshot; }
 private:

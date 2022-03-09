@@ -461,3 +461,7 @@ void AppsContainer::resetShiftAlphaStatus() {
   Ion::Events::setShiftAlphaStatus(Ion::Events::ShiftAlphaStatus::Default);
   updateAlphaLock();
 }
+
+void AppsContainer::relaunchCurrentApp() {
+  Container::relaunchCurrentApp();
+}

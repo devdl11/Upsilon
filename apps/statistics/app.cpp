@@ -73,4 +73,8 @@ App::App(Snapshot * snapshot, Poincare::Context * parentContext) :
 {
 }
 
+Keyboard_XNT::AppsKeys App::getAppKey() {
+  return Keyboard_XNT::AppsKeys::STATISTICS;
+}
+
 }
