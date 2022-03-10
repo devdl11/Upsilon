@@ -10,6 +10,7 @@
 #include "root_graph_controller.h"
 #include "graph_view.h"
 #include "banner_view.h"
+#include "apps/shared/function_active_function_toogle.h"
 #include <apps/i18n.h>
 
 namespace Graph {
@@ -29,14 +30,14 @@ public:
   int reusableCellCount(int type) override;
   int typeAtLocation(int i, int j) override;
   void willDisplayCellForIndex(HighlightCell * cell, int index) override;
-  void setRecord(Ion::Storage::Record record);
+  void setRecordDelegate(Shared::FunctionActiveFunctionToogle * record);
 private:
   bool shouldDisplayIntersection() const;
   MessageTableCellWithChevron m_preimageCell;
   constexpr static int k_totalNumberOfReusableCells = 6;
   MessageTableCell m_cells[k_totalNumberOfReusableCells];
   SelectableTableView m_selectableTableView;
-  Ion::Storage::Record m_record;
+  Shared::FunctionActiveFunctionToogle * m_recordDelegate;
   PreimageParameterController m_preimageParameterController;
   PreimageGraphController m_preimageGraphController;
   TangentGraphController m_tangentGraphController;

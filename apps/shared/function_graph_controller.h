@@ -7,6 +7,7 @@
 #include "function_store.h"
 #include "function_graph_view.h"
 #include "function_curve_parameter_controller.h"
+#include "function_active_function_toogle.h"
 
 namespace Shared {
 
@@ -51,6 +52,7 @@ private:
   uint32_t rangeVersion() override;
 
   int * m_indexFunctionSelectedByCursor;
+  FunctionActiveFunctionToogle m_activeFunctionToogle;
 };
 
 }

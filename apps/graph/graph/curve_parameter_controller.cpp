@@ -41,7 +41,7 @@ bool CurveParameterController::handleEvent(Ion::Events::Event event) {
     switch (index) {
       case 0:
       {
-        m_calculationParameterController.setRecord(m_record);
+        m_calculationParameterController.setRecordDelegate(m_recordDelegate);
         StackViewController * stack = (StackViewController *)parentResponder();
         stack->push(&m_calculationParameterController);
         return true;
@@ -82,7 +82,7 @@ void CurveParameterController::viewWillAppear() {
 }
 
 bool CurveParameterController::shouldDisplayCalculationAndDerivative() const {
-  Shared::ExpiringPointer<ContinuousFunction> f = App::app()->functionStore()->modelForRecord(m_record);
+  Shared::ExpiringPointer<ContinuousFunction> f = App::app()->functionStore()->modelForRecord(m_recordDelegate->getRecord());
   return f->plotType() == ContinuousFunction::PlotType::Cartesian;
 }
 

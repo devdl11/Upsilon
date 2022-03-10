@@ -3,6 +3,7 @@
 
 #include <escher.h>
 #include "function_go_to_parameter_controller.h"
+#include "function_active_function_toogle.h"
 
 namespace Shared {
 
@@ -13,12 +14,12 @@ public:
   TELEMETRY_ID("CurveParameter");
   void didBecomeFirstResponder() override;
   KDCoordinate cellHeight() override;
-  void setRecord(Ion::Storage::Record record) { m_record = record; }
+  void setRecordDelegate(FunctionActiveFunctionToogle * toogle) { m_recordDelegate = toogle; }
 protected:
   bool handleGotoSelection();
   MessageTableCellWithChevron m_goToCell;
   SelectableTableView m_selectableTableView;
-  Ion::Storage::Record m_record;
+  FunctionActiveFunctionToogle * m_recordDelegate;
 private:
   virtual FunctionGoToParameterController * goToParameterController() = 0;
 };

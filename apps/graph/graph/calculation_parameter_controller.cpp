@@ -12,7 +12,7 @@ CalculationParameterController::CalculationParameterController(Responder * paren
   ViewController(parentResponder),
   m_preimageCell(I18n::Message::Preimage),
   m_selectableTableView(this),
-  m_record(),
+  m_recordDelegate(nullptr),
   m_preimageParameterController(nullptr, inputEventHandlerDelegate, range, cursor, &m_preimageGraphController),
   m_preimageGraphController(nullptr, graphView, bannerView, range, cursor),
   m_tangentGraphController(nullptr, graphView, bannerView, range, cursor),
@@ -50,13 +50,13 @@ bool CalculationParameterController::handleEvent(Ion::Events::Event event) {
     int indexController = row == 0 ? 0 : row + !displayIntersection;
     ViewController * controller = controllers[indexController];
     if (row == 0) {
-      m_preimageParameterController.setRecord(m_record);
+      m_preimageParameterController.setRecord(m_recordDelegate->getRecord());
     } else if (row == 4 + displayIntersection) {
-      m_tangentGraphController.setRecord(m_record);
+      m_tangentGraphController.setRecordDelegate(m_recordDelegate);
     } else if (row == 5 + displayIntersection) {
-      m_integralGraphController.setRecord(m_record);
+      m_integralGraphController.setRecord(m_recordDelegate->getRecord());
     } else {
-      static_cast<CalculationGraphController *>(controller)->setRecord(m_record);
+      static_cast<CalculationGraphController *>(controller)->setRecord(m_recordDelegate->getRecord());
     }
     StackViewController * stack = static_cast<StackViewController *>(parentResponder());
     if (row > 0) {
@@ -113,8 +113,8 @@ void CalculationParameterController::willDisplayCellForIndex(HighlightCell * cel
   }
 }
 
-void CalculationParameterController::setRecord(Ion::Storage::Record record) {
-  m_record = record;
+void CalculationParameterController::setRecordDelegate(Shared::FunctionActiveFunctionToogle * record) {
+  m_recordDelegate = record;
 }
 
 bool CalculationParameterController::shouldDisplayIntersection() const {
