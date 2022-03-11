@@ -9,16 +9,17 @@ namespace Shared {
 
 class FunctionActiveFunctionToogle {
 public:
-  FunctionActiveFunctionToogle(FunctionStore * store, int * indexPtr) : m_functionStore(store), m_index(indexPtr) {}
+  explicit FunctionActiveFunctionToogle(FunctionStore * store) : m_functionStore(store), m_index(0) {}
 
   Ion::Storage::Record getRecord();
-  void setCurrentIndex(int ni) { *m_index = ni; }
+  void setCurrentIndex(int ni) { m_index = ni; }
+  void setFunctionStorePtr(FunctionStore * store) { m_functionStore = store; }
   void moveUp();
   void moveDown();
 
 private:
   FunctionStore * m_functionStore;
-  int * m_index;
+  int m_index;
 
 };
 }

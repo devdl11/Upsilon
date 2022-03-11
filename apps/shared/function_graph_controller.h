@@ -52,7 +52,6 @@ private:
   uint32_t rangeVersion() override;
 
   int * m_indexFunctionSelectedByCursor;
-  FunctionActiveFunctionToogle m_activeFunctionToogle;
 };
 
 }

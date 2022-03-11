@@ -14,8 +14,7 @@ namespace Shared {
 
 FunctionGraphController::FunctionGraphController(Responder * parentResponder, InputEventHandlerDelegate * inputEventHandlerDelegate, ButtonRowController * header, InteractiveCurveViewRange * interactiveRange, CurveView * curveView, CurveViewCursor * cursor, int * indexFunctionSelectedByCursor, uint32_t * rangeVersion) :
   InteractiveCurveViewController(parentResponder, inputEventHandlerDelegate, header, interactiveRange, curveView, cursor, rangeVersion),
-  m_indexFunctionSelectedByCursor(indexFunctionSelectedByCursor),
-  m_activeFunctionToogle(functionStore(), indexFunctionSelectedByCursor)
+  m_indexFunctionSelectedByCursor(indexFunctionSelectedByCursor)
 {
 }
 
@@ -48,8 +47,9 @@ void FunctionGraphController::viewWillAppear() {
 }
 
 bool FunctionGraphController::handleEnter() {
-  m_activeFunctionToogle.setCurrentIndex(indexFunctionSelectedByCursor());
-  curveParameterController()->setRecordDelegate(&m_activeFunctionToogle);
+  AppsContainer::sharedAppsContainer()->getActiveFunctionToogle()->setFunctionStorePtr(functionStore());
+  AppsContainer::sharedAppsContainer()->getActiveFunctionToogle()->setCurrentIndex(indexFunctionSelectedByCursor());
+  curveParameterController()->setRecordDelegate(AppsContainer::sharedAppsContainer()->getActiveFunctionToogle());
   StackViewController * stack = stackController();
   stack->push(curveParameterController());
   return true;

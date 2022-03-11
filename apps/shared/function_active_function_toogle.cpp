@@ -1,16 +1,22 @@
 #include "function_active_function_toogle.h"
 
 Ion::Storage::Record Shared::FunctionActiveFunctionToogle::getRecord() {
-  if (m_functionStore->numberOfActiveFunctions() <= 0) {
+  if (m_functionStore == nullptr || m_functionStore->numberOfActiveFunctions() <= 0) {
     return Ion::Storage::Record();
   }
-  return m_functionStore->activeRecordAtIndex(*m_index);
+  return m_functionStore->activeRecordAtIndex(m_index);
 }
 
 void Shared::FunctionActiveFunctionToogle::moveUp() {
-  *m_index = m_functionStore->numberOfActiveFunctions() <= *m_index + 1 ? 0 : *m_index + 1;
+  if (m_functionStore == nullptr) {
+    return;
+  }
+  m_index = m_functionStore->numberOfActiveFunctions() <= m_index + 1 ? 0 : m_index + 1;
 }
 
 void Shared::FunctionActiveFunctionToogle::moveDown() {
-  *m_index = 0 > *m_index - 1 ? m_functionStore->numberOfActiveFunctions() - 1 : *m_index - 1;
+  if (m_functionStore == nullptr) {
+    return;
+  }
+  m_index = 0 > m_index - 1 ? m_functionStore->numberOfActiveFunctions() - 1 : m_index - 1;
 }

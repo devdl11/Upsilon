@@ -104,10 +104,12 @@ bool TangentGraphController::handleEvent(Ion::Events::Event event) {
   if (event == Ion::Events::Up) {
     m_recordDelegate->moveUp();
     m_graphView->selectRecord(m_recordDelegate->getRecord());
+    m_graphView->reload();
     return true;
   } else if (event == Ion::Events::Down) {
     m_recordDelegate->moveDown();
     m_graphView->selectRecord(m_recordDelegate->getRecord());
+    m_graphView->reload();
     return true;
   }
   return SimpleInteractiveCurveViewController::handleEvent(event);
