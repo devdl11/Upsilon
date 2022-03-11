@@ -34,13 +34,12 @@ public:
 private:
   bool shouldDisplayIntersection() const;
   MessageTableCellWithChevron m_preimageCell;
-  constexpr static int k_totalNumberOfReusableCells = 6;
+  constexpr static int k_totalNumberOfReusableCells = 5;
   MessageTableCell m_cells[k_totalNumberOfReusableCells];
   SelectableTableView m_selectableTableView;
   Shared::FunctionActiveFunctionToogle * m_recordDelegate;
   PreimageParameterController m_preimageParameterController;
   PreimageGraphController m_preimageGraphController;
-  TangentGraphController m_tangentGraphController;
   IntegralGraphController m_integralGraphController;
   MinimumGraphController m_minimumGraphController;
   MaximumGraphController m_maximumGraphController;

@@ -19,6 +19,7 @@ void GraphView::reload() {
     KDRect dirtyZone(KDRect(0, 0, bounds().width(), bounds().height()-m_bannerView->bounds().height()));
     markRectAsDirty(dirtyZone);
   }
+  markRectAsDirty(bounds());
   return FunctionGraphView::reload();
 }
 

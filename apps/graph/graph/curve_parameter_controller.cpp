@@ -14,7 +14,9 @@ CurveParameterController::CurveParameterController(InputEventHandlerDelegate * i
   m_graphController(graphController),
   m_calculationCell(I18n::Message::Compute),
   m_derivativeCell(I18n::Message::DerivateNumber),
-  m_calculationParameterController(this, inputEventHandlerDelegate, graphView, bannerView, graphRange, cursor)
+  m_calculationParameterController(this, inputEventHandlerDelegate, graphView, bannerView, graphRange, cursor),
+  m_tangenteCell(I18n::Message::Tangent),
+  m_tangentGraphController(nullptr, graphView, bannerView, graphRange, cursor)
 {
 }
 
@@ -54,6 +56,13 @@ bool CurveParameterController::handleEvent(Ion::Events::Event event) {
         m_selectableTableView.reloadData();
         return true;
       }
+      case 3:
+      {
+        m_tangentGraphController.setRecordDelegate(m_recordDelegate);
+        StackViewController * stack = (StackViewController *)parentResponder();
+        stack->push(&m_tangentGraphController);
+        return true;
+      }
       default:
         assert(false);
         return false;
@@ -68,12 +77,12 @@ int CurveParameterController::numberOfRows() const {
 
 HighlightCell * CurveParameterController::reusableCell(int index) {
   assert(0 <= index && index < reusableCellCount());
-  HighlightCell * cells[] = {&m_calculationCell, &m_goToCell, &m_derivativeCell};
+  HighlightCell * cells[] = {&m_calculationCell, &m_goToCell, &m_derivativeCell, &m_tangenteCell};
   return cells[cellIndex(index)];
 }
 
 int CurveParameterController::reusableCellCount() const {
-  return 1 + (shouldDisplayCalculationAndDerivative() ? 2 : 0);
+  return 1 + (shouldDisplayCalculationAndDerivative() ? 3 : 0);
 }
 
 void CurveParameterController::viewWillAppear() {

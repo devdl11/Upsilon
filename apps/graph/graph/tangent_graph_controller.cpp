@@ -104,12 +104,24 @@ bool TangentGraphController::handleEvent(Ion::Events::Event event) {
   if (event == Ion::Events::Up) {
     m_recordDelegate->moveUp();
     m_graphView->selectRecord(m_recordDelegate->getRecord());
+    // TODO maybe do: Very ugly workaround... Needs something better to reload the data banner
+    moveCursorHorizontally(1);
+    moveCursorHorizontally(-1);
+
     m_graphView->reload();
+    reloadBannerView();
+    viewWillAppear();
     return true;
   } else if (event == Ion::Events::Down) {
     m_recordDelegate->moveDown();
     m_graphView->selectRecord(m_recordDelegate->getRecord());
+
+    moveCursorHorizontally(1);
+    moveCursorHorizontally(-1);
+
     m_graphView->reload();
+    reloadBannerView();
+    viewWillAppear();
     return true;
   }
   return SimpleInteractiveCurveViewController::handleEvent(event);
