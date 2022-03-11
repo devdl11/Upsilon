@@ -110,7 +110,7 @@ void CalculationParameterController::willDisplayCellForIndex(HighlightCell * cel
   }
 }
 
-void CalculationParameterController::setRecordDelegate(Shared::FunctionActiveFunctionToogle * record) {
+void CalculationParameterController::setRecordDelegate(Shared::FunctionActiveFunctionToggle * record) {
   m_recordDelegate = record;
 }
 

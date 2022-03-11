@@ -56,7 +56,7 @@ public:
   // Ion::StorageDelegate
   void storageDidChangeForRecord(const Ion::Storage::Record record) override;
   void storageIsFull() override;
-  Shared::FunctionActiveFunctionToogle * getActiveFunctionToogle();
+  Shared::FunctionActiveFunctionToggle * getActiveFunctionToggle();
 protected:
   Home::App::Snapshot * homeAppSnapshot() { return &m_homeSnapshot; }
 private:
@@ -89,7 +89,7 @@ private:
 
   // Shared Class that need to be initialized at the beginning
 
-  Shared::FunctionActiveFunctionToogle m_activeFunctionTooggle;
+  Shared::FunctionActiveFunctionToggle m_activeFunctionTooggle;
 };
 
 #endif

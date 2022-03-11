@@ -57,7 +57,7 @@ bool TangentGraphController::textFieldDidFinishEditing(TextField * textField, co
   return true;
 }
 
-void TangentGraphController::setRecordDelegate(Shared::FunctionActiveFunctionToogle * record) {
+void TangentGraphController::setRecordDelegate(Shared::FunctionActiveFunctionToggle * record) {
   m_graphView->selectRecord(record->getRecord());
   m_recordDelegate = record;
 }

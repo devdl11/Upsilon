@@ -462,6 +462,6 @@ void AppsContainer::resetShiftAlphaStatus() {
   updateAlphaLock();
 }
 
-FunctionActiveFunctionToogle *AppsContainer::getActiveFunctionToogle() {
+FunctionActiveFunctionToggle *AppsContainer::getActiveFunctionToggle() {
   return &m_activeFunctionTooggle;
 }

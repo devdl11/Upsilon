@@ -18,7 +18,7 @@ public:
   void didBecomeFirstResponder() override;
   TELEMETRY_ID("Tangent");
   bool textFieldDidFinishEditing(TextField * textField, const char * text, Ion::Events::Event event) override;
-  void setRecordDelegate(Shared::FunctionActiveFunctionToogle * record);
+  void setRecordDelegate(Shared::FunctionActiveFunctionToggle * record);
 private:
   float cursorBottomMarginRatio() override { return 0.22f; }
   Shared::InteractiveCurveViewRange * interactiveCurveViewRange() override { return m_graphRange; }
@@ -35,7 +35,7 @@ private:
   GraphView * m_graphView;
   BannerView * m_bannerView;
   Shared::InteractiveCurveViewRange * m_graphRange;
-  Shared::FunctionActiveFunctionToogle * m_recordDelegate;
+  Shared::FunctionActiveFunctionToggle * m_recordDelegate;
 };
 
 }

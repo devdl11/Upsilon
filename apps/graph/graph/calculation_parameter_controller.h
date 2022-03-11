@@ -30,14 +30,14 @@ public:
   int reusableCellCount(int type) override;
   int typeAtLocation(int i, int j) override;
   void willDisplayCellForIndex(HighlightCell * cell, int index) override;
-  void setRecordDelegate(Shared::FunctionActiveFunctionToogle * record);
+  void setRecordDelegate(Shared::FunctionActiveFunctionToggle * record);
 private:
   bool shouldDisplayIntersection() const;
   MessageTableCellWithChevron m_preimageCell;
   constexpr static int k_totalNumberOfReusableCells = 5;
   MessageTableCell m_cells[k_totalNumberOfReusableCells];
   SelectableTableView m_selectableTableView;
-  Shared::FunctionActiveFunctionToogle * m_recordDelegate;
+  Shared::FunctionActiveFunctionToggle * m_recordDelegate;
   PreimageParameterController m_preimageParameterController;
   PreimageGraphController m_preimageGraphController;
   IntegralGraphController m_integralGraphController;
