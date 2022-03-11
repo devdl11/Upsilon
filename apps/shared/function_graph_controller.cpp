@@ -47,9 +47,9 @@ void FunctionGraphController::viewWillAppear() {
 }
 
 bool FunctionGraphController::handleEnter() {
-  AppsContainer::sharedAppsContainer()->getActiveFunctionToogle()->setFunctionStorePtr(functionStore());
-  AppsContainer::sharedAppsContainer()->getActiveFunctionToogle()->setCurrentIndex(indexFunctionSelectedByCursor());
-  curveParameterController()->setRecordDelegate(AppsContainer::sharedAppsContainer()->getActiveFunctionToogle());
+  AppsContainer::sharedAppsContainer()->getActiveFunctionToggle()->setFunctionStorePtr(functionStore());
+  AppsContainer::sharedAppsContainer()->getActiveFunctionToggle()->setCurrentIndex(indexFunctionSelectedByCursor());
+  curveParameterController()->setRecordDelegate(AppsContainer::sharedAppsContainer()->getActiveFunctionToggle());
   StackViewController * stack = stackController();
   stack->push(curveParameterController());
   return true;

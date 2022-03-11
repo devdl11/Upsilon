@@ -6,7 +6,7 @@
 #include "graph_controller_helper.h"
 #include "../../shared/simple_interactive_curve_view_controller.h"
 #include "../../shared/function_banner_delegate.h"
-#include "apps/shared/function_active_function_toogle.h"
+#include "apps/shared/function_active_function_toggle.h"
 
 namespace Graph {
 

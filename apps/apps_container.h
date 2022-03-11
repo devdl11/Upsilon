@@ -18,7 +18,7 @@
 #include "shared/global_context.h"
 #include "clock_timer.h"
 #include "on_boarding/prompt_controller.h"
-#include "shared/function_active_function_toogle.h"
+#include "shared/function_active_function_toggle.h"
 
 #include <ion/events.h>
 

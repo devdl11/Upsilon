@@ -2,7 +2,7 @@
 #include "apps_container_storage.h"
 #include "global_preferences.h"
 #include "exam_mode_configuration.h"
-#include "shared/function_active_function_toogle.h"
+#include "shared/function_active_function_toggle.h"
 #include <ion.h>
 #include <poincare/init.h>
 #include <poincare/exception_checkpoint.h>

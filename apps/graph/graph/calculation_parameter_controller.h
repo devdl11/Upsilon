@@ -10,7 +10,7 @@
 #include "root_graph_controller.h"
 #include "graph_view.h"
 #include "banner_view.h"
-#include "apps/shared/function_active_function_toogle.h"
+#include "apps/shared/function_active_function_toggle.h"
 #include <apps/i18n.h>
 
 namespace Graph {

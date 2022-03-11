@@ -1,5 +1,5 @@
-#ifndef LAURYUPSILON_FUNCTION_ACTIVE_FUNCTION_TOOGLE_H
-#define LAURYUPSILON_FUNCTION_ACTIVE_FUNCTION_TOOGLE_H
+#ifndef LAURYUPSILON_FUNCTION_ACTIVE_FUNCTION_TOGGLE_H
+#define LAURYUPSILON_FUNCTION_ACTIVE_FUNCTION_TOGGLE_H
 
 
 #include "../../ion/include/ion/storage.h"
@@ -7,9 +7,9 @@
 
 namespace Shared {
 
-class FunctionActiveFunctionToogle {
+class FunctionActiveFunctionToggle {
 public:
-  explicit FunctionActiveFunctionToogle(FunctionStore * store) : m_functionStore(store), m_index(0) {}
+  explicit FunctionActiveFunctionToggle(FunctionStore * store) : m_functionStore(store), m_index(0) {}
 
   Ion::Storage::Record getRecord();
   void setCurrentIndex(int ni) { m_index = ni; }
@@ -24,4 +24,4 @@ private:
 };
 }
 
-#endif //LAURYUPSILON_FUNCTION_ACTIVE_FUNCTION_TOOGLE_H
+#endif //LAURYUPSILON_FUNCTION_ACTIVE_FUNCTION_TOGGLE_H
