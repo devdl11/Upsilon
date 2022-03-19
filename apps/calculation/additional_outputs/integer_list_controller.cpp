@@ -45,6 +45,12 @@ void IntegerListController::setExpression(Poincare::Expression e) {
   int numberOfChars = decimal.serialize(buffer, Poincare::DecimalNode::k_maxBufferSize, Preferences::PrintFloatMode::Scientific);
 
   if (*(UTF8Helper::CodePointSearch(buffer, Ion::InternalStorage::k_dotChar)) != 0) {
+    int originalNumber = numberOfChars;
+    int maxShift = originalNumber - 3 - (int)log10(abs(m_exponent)) - 1 - 2;
+    if (shift > maxShift) {
+      shift = maxShift;
+      GlobalPreferences::sharedGlobalPreferences()->setDecimalShift(maxShift);
+    }
     decimal = Decimal::Builder(integer, m_exponent-shift);
     numberOfChars = decimal.serialize(buffer, Poincare::DecimalNode::k_maxBufferSize, Preferences::PrintFloatMode::Scientific);
 
@@ -56,6 +62,10 @@ void IntegerListController::setExpression(Poincare::Expression e) {
 
     if (m_exponent - shift == 0) {
       buffer[numberOfChars-1] = '\0';
+    }
+
+    if (shift == maxShift && m_exponent - shift != 0) {
+      strlcpy(&buffer[shift + 1], &buffer[shift + 2], strlen(&buffer[shift + 1]));
     }
   }
 
