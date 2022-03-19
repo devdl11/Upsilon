@@ -35,19 +35,28 @@ void IntegerListController::setExpression(Poincare::Expression e) {
     m_layouts[index] = integer.createLayout(baseAtIndex(index));
   }
 
-  int value = integer.extractedInt();
+  const int * value = (int *)integer.digits();
   int shift = GlobalPreferences::sharedGlobalPreferences()->getDecimalShift();
-  m_exponent = (int)log10(abs(value));
+  m_exponent = (int)log10(abs(*value));
 
-  Decimal decimal = Decimal::Builder(integer, m_exponent-shift);
+  Decimal decimal = Decimal::Builder(integer, m_exponent);
 
   char buffer[Poincare::DecimalNode::k_maxBufferSize];
   int numberOfChars = decimal.serialize(buffer, Poincare::DecimalNode::k_maxBufferSize, Preferences::PrintFloatMode::Scientific);
 
-  for (int i = 0; i < shift; i++) {
-    char c = buffer[i+1];
-    buffer[i+1] = buffer[i+2];
-    buffer[i+2] = c;
+  if (*(UTF8Helper::CodePointSearch(buffer, Ion::InternalStorage::k_dotChar)) != 0) {
+    decimal = Decimal::Builder(integer, m_exponent-shift);
+    numberOfChars = decimal.serialize(buffer, Poincare::DecimalNode::k_maxBufferSize, Preferences::PrintFloatMode::Scientific);
+
+    for (int i = 0; i < shift; i++) {
+      char c = buffer[i+1];
+      buffer[i+1] = buffer[i+2];
+      buffer[i+2] = c;
+    }
+  }
+
+  if (m_exponent - shift == 0) {
+    buffer[numberOfChars-1] = '\0';
   }
 
   Layout layout = LayoutHelper::String(buffer, numberOfChars);
