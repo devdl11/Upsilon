@@ -53,10 +53,10 @@ void IntegerListController::setExpression(Poincare::Expression e) {
       buffer[i+1] = buffer[i+2];
       buffer[i+2] = c;
     }
-  }
 
-  if (m_exponent - shift == 0) {
-    buffer[numberOfChars-1] = '\0';
+    if (m_exponent - shift == 0) {
+      buffer[numberOfChars-1] = '\0';
+    }
   }
 
   Layout layout = LayoutHelper::String(buffer, numberOfChars);
