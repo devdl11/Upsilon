@@ -35,7 +35,7 @@ SECTIONS {
     _isr_vector_table_end_ram = .;
   } >SRAM
 
-  .bootloader_shared ORIGIN(SRAM) + BOOTLOADER_SHARED_OFFSET : AT(ORIGIN(FLASH) + SIZEOF(.signed_pazyload_prefix) + SIZEOF(.kernel_header) + SIZEOF(.isr_vector_table) + SIZEOF(.slot_info)) {
+  .bootloader_shared ORIGIN(SRAM) + BOOTLOADER_SHARED_OFFSET : AT(ORIGIN(FLASH) + SIZEOF(.signed_payload_prefix) + SIZEOF(.kernel_header) + SIZEOF(.isr_vector_table) + SIZEOF(.slot_info)) {
     . = (ORIGIN(SRAM) + BOOTLOADER_SHARED_OFFSET);
     _bootloader_shared_start = .;
     KEEP(*(.bootloader_shared))

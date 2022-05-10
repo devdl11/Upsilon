@@ -115,7 +115,7 @@ public:
   int numberOfRecords();
   Record recordAtIndex(int index);
 protected:
-  InternalStorage(bool recoverying = false);
+  InternalStorage();
   /* Getters on address in buffer */
   char * pointerOfRecord(const Record record) const;
   record_size_t sizeOfRecordStarting(char * start) const;
