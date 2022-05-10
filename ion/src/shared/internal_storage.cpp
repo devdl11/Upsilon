@@ -8,6 +8,7 @@
 #endif
 
 namespace Ion {
+  extern char staticStorageArea[];
 
 /* We want to implement a simple singleton pattern, to make sure the storage is
  * initialized on first use, therefore preventing the static init order fiasco.
@@ -463,14 +464,18 @@ void InternalStorage::destroyRecordsWithExtension(const char * extension) {
   }
 }
 
-InternalStorage::InternalStorage() :
-  m_magicHeader(Magic),
-  m_buffer(),
-  m_magicFooter(Magic),
-  m_delegate(nullptr),
-  m_lastRecordRetrieved(nullptr),
-  m_lastRecordRetrievedPointer(nullptr)
-{
+InternalStorage::InternalStorage(bool reco) {
+  m_magicHeader = Magic;
+  if (!reco) {
+    memset(m_buffer, 0, k_storageSize);
+  } else {
+    memcpy(m_buffer, (void*)((uint32_t)&staticStorageArea + sizeof(uint32_t)), k_storageSize);
+  }
+  m_magicFooter = Magic;
+  m_delegate = nullptr;
+  m_lastRecordRetrieved = nullptr;
+  m_lastRecordRetrievedPointer = nullptr;
+  
   assert(m_magicHeader == Magic);
   assert(m_magicFooter == Magic);
   // Set the size of the first record to 0

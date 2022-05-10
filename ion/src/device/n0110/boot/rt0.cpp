@@ -1,11 +1,13 @@
 #include <stdint.h>
 #include <string.h>
 #include <ion.h>
-#include <boot/isr.h>
+#include <bootloader/boot/isr.h>
 #include <drivers/board.h>
 #include <drivers/rtc.h>
 #include <drivers/reset.h>
 #include <drivers/timing.h>
+#include <bootloader/recovery.h>
+#include <bootloader/boot.h>
 
 typedef void (*cxx_constructor)();
 
@@ -26,6 +28,29 @@ void __attribute__((noinline)) abort() {
   while (1) {
   }
 #endif
+}
+
+
+void __attribute__((interrupt, noinline)) isr_systick() {
+  auto t = Ion::Device::Timing::MillisElapsed;
+  t++;
+  Ion::Device::Timing::MillisElapsed = t;
+}
+
+void __attribute__((noinline)) hard_fault_handler() {
+  Bootloader::Recovery::crash_handler("HardFault");
+}
+
+void __attribute__((noinline)) mem_fault_handler() {
+  Bootloader::Recovery::crash_handler("MemoryFault");
+}
+
+void __attribute__((noinline)) usage_fault_handler() {
+  Bootloader::Recovery::crash_handler("UsageFault");
+}
+
+void __attribute__((noinline)) bus_fault_handler() {
+  Bootloader::Boot::busError();
 }
 
 /* In order to ensure that this method is execute from the external flash, we
@@ -72,22 +97,25 @@ void __attribute__((noinline)) start() {
   /* This is where execution starts after reset.
    * Many things are not initialized yet so the code here has to pay attention. */
 
+  /* Initialize the FPU as early as possible.
+   * For example, static C++ objects are very likely to manipulate float values */
+  Ion::Device::Board::initFPU();
+
+  
+  
   /* Copy data section to RAM
-   * The data section is R/W but its initialization value matters. It's stored
-   * in Flash, but linked as if it were in RAM. Now's our opportunity to copy
-   * it. Note that until then the data section (e.g. global variables) contains
-   * garbage values and should not be used. */
+  * The data section is R/W but its initialization value matters. It's stored
+  * in Flash, but linked as if it were in RAM. Now's our opportunity to copy
+  * it. Note that until then the data section (e.g. global variables) contains
+  * garbage values and should not be used. */
   size_t dataSectionLength = (&_data_section_end_ram - &_data_section_start_ram);
   memcpy(&_data_section_start_ram, &_data_section_start_flash, dataSectionLength);
 
   /* Zero-out the bss section in RAM
-   * Until we do, any uninitialized global variable will be unusable. */
+  * Until we do, any uninitialized global variable will be unusable. */
   size_t bssSectionLength = (&_bss_section_end_ram - &_bss_section_start_ram);
   memset(&_bss_section_start_ram, 0, bssSectionLength);
 
-  /* Initialize the FPU as early as possible.
-   * For example, static C++ objects are very likely to manipulate float values */
-  Ion::Device::Board::initFPU();
 
   /* Call static C++ object constructors
    * The C++ compiler creates an initialization function for each static object.
@@ -109,18 +137,11 @@ void __attribute__((noinline)) start() {
   }
 #endif
 
-  Ion::Device::Board::init();
-
   /* At this point, we initialized clocks and the external flash but no other
    * peripherals. */
+  Ion::Device::Board::init();
 
   jump_to_external_flash();
 
   abort();
-}
-
-void __attribute__((interrupt, noinline)) isr_systick() {
-  auto t = Ion::Device::Timing::MillisElapsed;
-  t++;
-  Ion::Device::Timing::MillisElapsed = t;
 }

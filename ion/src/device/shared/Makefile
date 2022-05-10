@@ -1,8 +1,7 @@
-include ion/src/device/shared/boot/Makefile
-ifneq ($(filter bootloader, ${MAKECMDGOALS}), bootloader)
-include ion/src/device/shared/usb/Makefile
+ifneq ($(MODEL), n0110)
+  include ion/src/device/shared/usb/Makefile
 else
-include ion/src/device/bootloader/usb/Makefile
+  include ion/src/device/bootloader/usb/Makefile
 endif
 include ion/src/device/shared/drivers/Makefile
 

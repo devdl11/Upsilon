@@ -129,7 +129,7 @@ public:
   bool setMetadataForRecord(Record r, int size, const void * metadata);
   void removeMetadataForRecord(Record r);
 protected:
-  InternalStorage();
+  InternalStorage(bool recoverying = false);
   /* Getters on address in buffer */
   char * pointerOfRecord(const Record record) const;
   record_size_t sizeOfRecordStarting(char * start) const;

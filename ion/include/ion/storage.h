@@ -16,6 +16,7 @@ public:
   using InternalStorage::eqExtension;
 
   static Storage * sharedStorage();
+  static Storage * recoverySharedStorage();
 
   size_t availableSize();
   size_t putAvailableSpaceAtEndOfRecord(Record r);
@@ -42,8 +43,8 @@ public:
   void emptyTrash();
 
 private:
-  Storage():
-    InternalStorage() {}
+  Storage(bool recovery = false):
+    InternalStorage(recovery) {}
 
   Record m_trashRecord;
 };

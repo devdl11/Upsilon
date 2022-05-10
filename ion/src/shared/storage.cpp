@@ -7,9 +7,15 @@
 namespace Ion {
 
 uint32_t staticStorageArea[sizeof(Storage)/sizeof(uint32_t)] = {0};
+static Storage * storage;
 
 Storage * Storage::sharedStorage() {
-  static Storage * storage = new (staticStorageArea) Storage();
+  storage = new (staticStorageArea) Storage(true);
+  return storage;
+}
+
+Storage * Storage::recoverySharedStorage() {
+  storage = new (staticStorageArea) Storage(true);
   return storage;
 }
 

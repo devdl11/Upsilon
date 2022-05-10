@@ -1,3 +1,5 @@
+include ion/src/device/n0100/boot/Makefile
+
 ion_device_src += $(addprefix ion/src/device/n0100/drivers/, \
   board.cpp \
   external_flash.cpp \
@@ -5,10 +7,6 @@ ion_device_src += $(addprefix ion/src/device/n0100/drivers/, \
   power.cpp \
   reset.cpp \
   usb.cpp \
-)
-
-ion_device_src += $(addprefix ion/src/device/n0100/boot/, \
-  rt0.cpp \
 )
 
 ion_device_src += $(addprefix ion/src/device/n0100/, \

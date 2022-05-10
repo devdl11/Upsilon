@@ -4,9 +4,13 @@
 #include <drivers/config/clocks.h>
 #include <drivers/config/internal_flash.h>
 #include <drivers/external_flash.h>
+#include <drivers/timing.h>
 #include <regs/regs.h>
 #include <ion.h>
 
+#include <bootloader/drivers/stm32_drivers.h>
+
+using namespace STM32;
 typedef void(*ISR)(void);
 extern ISR InitialisationVector[];
 
@@ -62,7 +66,7 @@ void initMPU() {
   /* This is needed for interfacing with the LCD
    * We define the whole FMC memory bank 1 as strongly ordered, non-executable
    * and not accessible. We define the FMC command and data addresses as
-   * writeable non-cacheable, non-buffereable and non shareable. */
+   * writeable non-cachable, non-buffereable and non shareable. */
   int sector = 0;
   MPU.RNR()->setREGION(sector++);
   MPU.RBAR()->setADDR(0x60000000);
@@ -104,7 +108,7 @@ void initMPU() {
    * then an AHB error is given (AN4760). To prevent this to happen, we
    * configure the MPU to define the whole Quad-SPI addressable space as
    * strongly ordered, non-executable and not accessible. Plus, we define the
-   * Quad-SPI region corresponding to the External Chip as executable and
+   * Quad-SPI region corresponding to the Expternal Chip as executable and
    * fully accessible (AN4861). */
   MPU.RNR()->setREGION(sector++);
   MPU.RBAR()->setADDR(0x90000000);
@@ -131,6 +135,11 @@ void initMPU() {
   // 2.3 Enable MPU
   MPU.CTRL()->setPRIVDEFENA(true);
   MPU.CTRL()->setENABLE(true);
+
+  //2.4 Enable fault exceptions
+  CORTEX.SHCRS()->setMEMFAULTENA(true);
+  CORTEX.SHCRS()->setBUSFAULTENA(true);
+  CORTEX.SHCRS()->setUSGFAULTENA(true);
 
   // 3. Data/instruction synchronisation barriers to ensure that the new MPU configuration is used by subsequent instructions.
   Cache::dsb();
@@ -434,7 +443,19 @@ bool pcbVersionIsLocked() {
   return *reinterpret_cast<const uint8_t *>(InternalFlash::Config::OTPLockAddress(k_pcbVersionOTPIndex)) == 0;
 }
 
-void jumpToInternalBootloader() {}
+void jumpToInternalBootloader() {
+  asm volatile ("cpsie i" : : : "memory");
+
+  STM32::rcc_deinit();
+  STM32::hal_deinit();
+  STM32::systick_deinit();
+
+  const uint32_t p = (*((uint32_t *) 0x1FF00000));
+  asm volatile ("MSR msp, %0" : : "r" (p) : );
+  void (*SysMemBootJump)(void);
+	SysMemBootJump = (void (*)(void)) (*((uint32_t *) 0x1FF00004));
+	SysMemBootJump();
+}
 
 }
 }

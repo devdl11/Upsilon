@@ -1,3 +1,4 @@
+include ion/src/device/bootloader/boot/Makefile
 
 ion_device_src += $(addprefix ion/src/device/bootloader/drivers/, \
   board.cpp \
@@ -8,10 +9,7 @@ ion_device_src += $(addprefix ion/src/device/bootloader/drivers/, \
   reset.cpp \
   trampoline.cpp \
   usb.cpp \
-)
-
-ion_device_src += $(addprefix ion/src/device/bootloader/boot/, \
-  rt0.cpp \
+  bldata.cpp \
 )
 
 ion_device_src += $(addprefix ion/src/device/bootloader/, \

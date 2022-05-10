@@ -8,6 +8,7 @@ MEMORY {
 STACK_SIZE = 32K;
 TRAMPOLINES_OFFSET = 0xE000;
 CUSTOM_TRAMPOLINES_OFFSET = 64K - 64;
+BOOTLOADER_SHARED_OFFSET = 0x3d0;
 
 SECTIONS {
   .isr_vector_table ORIGIN(INTERNAL_FLASH) : {
@@ -31,7 +32,16 @@ SECTIONS {
     KEEP(*(.header))
   } >INTERNAL_FLASH
 
-  .rodata : {
+  .bootloader_shared ORIGIN(SRAM) + BOOTLOADER_SHARED_OFFSET : AT(ORIGIN(INTERNAL_FLASH) + SIZEOF(.isr_vector_table) + SIZEOF(.header)) {
+    . = ORIGIN(SRAM) + BOOTLOADER_SHARED_OFFSET;
+    _bootloader_shared_start = .;
+    KEEP(*(.bootloader_shared))
+    KEEP(*(.bootloader_shared.*))
+    _bootloader_shared_end = .;
+  } >SRAM
+
+
+  .rodata ORIGIN(INTERNAL_FLASH) + SIZEOF(.isr_vector_table) + SIZEOF(.header) + SIZEOF(.bootloader_shared) : {
     . = ALIGN(4);
     *(.rodata)
     *(.rodata.*)
@@ -51,7 +61,7 @@ SECTIONS {
     KEEP(*(.fake_isr_function))
     KEEP(*(.fake_isr_function.*))
     _fake_isr_function_end = .;
-  }
+  } >INTERNAL_FLASH
 
   .text : {
     . = ALIGN(4);
@@ -62,7 +72,7 @@ SECTIONS {
   .init_array : {
     . = ALIGN(4);
     _init_array_start = .;
-    KEEP (*(.init_array*))
+    KEEP(*(.init_array*))
     _init_array_end = .;
   } >INTERNAL_FLASH
 
