@@ -4,3 +4,6 @@
 [submodule "apps/atomic"]
 	path = apps/atomic
 	url = https://github.com/Lauryy06/atomic
+[submodule "UpsilonBootloaderApp"]
+	path = UpsilonBootloaderApp
+	url = https://github.com/devdl11/UpsilonBootloaderApp.git
