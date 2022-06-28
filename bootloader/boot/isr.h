@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 void start();
+void secure_start();
 void abort();
 void isr_systick();
 

@@ -48,6 +48,7 @@ public:
   static void bootSelectedSlot();
   __attribute__ ((noreturn)) static void jumpToInternalBootloader(); 
   __attribute((section(".fake_isr_function"))) __attribute__((used)) static void flash_interrupt();
+  __attribute((section(".secure_boot"))) __attribute__((used)) static void secure_boot();
 
   static void bootloader();
   static void lockInternal();

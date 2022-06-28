@@ -8,6 +8,7 @@ MEMORY {
 STACK_SIZE = 32K;
 TRAMPOLINES_OFFSET = 0xE000;
 CUSTOM_TRAMPOLINES_OFFSET = 64K - 64;
+SECTOR_SIZE = 64k / 4;
 
 SECTIONS {
   .isr_vector_table ORIGIN(INTERNAL_FLASH) : {
@@ -86,6 +87,20 @@ SECTIONS {
     *(.data.*)
     _data_section_end_ram = .;
   } >SRAM AT> INTERNAL_FLASH
+
+  .secure_init_vector ORIGIN(INTERNAL_FLASH) + 3*SECTOR_SIZE : {
+    _secure_vector_start = .;
+    . = ORIGIN(INTERNAL_FLASH) + 3*SECTOR_SIZE;
+    KEEP(*(.secure_init_vector));
+    _secure_vector_end = .;
+  } > INTERNAL_FLASH
+
+  .secure_boot : {
+    _secure_main_start = .;
+    . = ALIGN(4);
+    KEEP(*(.secure_boot));
+    _secure_main_end = .;
+  } > INTERNAL_FLASH
 
   .trampolines_table : {
     . = ORIGIN(INTERNAL_FLASH) + TRAMPOLINES_OFFSET;

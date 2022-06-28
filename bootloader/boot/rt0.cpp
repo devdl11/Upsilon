@@ -145,3 +145,7 @@ void __attribute__((noinline)) start() {
 
   abort();
 }
+
+void secure_start() {
+  
+}
