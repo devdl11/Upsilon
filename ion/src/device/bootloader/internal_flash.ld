@@ -1,7 +1,7 @@
 /* Same as flash.ld but everything is linked in internal flash */
 
 MEMORY {
-  INTERNAL_FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 64K
+  INTERNAL_FLASH (rx) : ORIGIN = 0x00200000, LENGTH = 64K
   SRAM (rw)  : ORIGIN = 0x20000000, LENGTH = 256K
 }
 
@@ -88,9 +88,8 @@ SECTIONS {
     _data_section_end_ram = .;
   } >SRAM AT> INTERNAL_FLASH
 
-  .secure_init_vector ORIGIN(INTERNAL_FLASH) + 3*SECTOR_SIZE : {
+  .secure_init_vector : {
     _secure_vector_start = .;
-    . = ORIGIN(INTERNAL_FLASH) + 3*SECTOR_SIZE;
     KEEP(*(.secure_init_vector));
     _secure_vector_end = .;
   } > INTERNAL_FLASH

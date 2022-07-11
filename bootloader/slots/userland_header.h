@@ -17,6 +17,8 @@ public:
   const char * upsilonVersion() const;
   const void * storageAddress() const;
   const size_t storageSize() const;
+  const uint32_t getExternalAppsFlashEnd() const { return m_externalAppsFlashEnd; }
+  const uint32_t getExternalAppsFlashStart() const { return m_externalAppsFlashStart; }
 
 private:
   UserlandHeader();

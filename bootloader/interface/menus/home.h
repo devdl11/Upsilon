@@ -18,10 +18,10 @@ namespace Bootloader {
       static InstallerMenu * installerMenu();
 
     private:
-      const char * getSlotOsText(Slot slot);
-      const char * getSlotText(Slot slot);
-      const char * getKernelText(Slot slot);
-      const char * getVersionText(Slot slot);
+      const char * getSlotOsText(const Slot * slot);
+      const char * getSlotText(const Slot * slot);
+      const char * getKernelText(const Slot * slot);
+      const char * getVersionText(const Slot * slot);
   };
 }
 

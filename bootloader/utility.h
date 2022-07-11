@@ -3,6 +3,7 @@
 
 namespace Utility {
   extern int versionSum(const char * version, int length);
+  extern int atoi(const char * str); // minimal implementation
 }
 
 #endif

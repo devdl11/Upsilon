@@ -41,6 +41,7 @@ void lockPCBVersion();
 bool pcbVersionIsLocked();
 
 void jumpToInternalBootloader();
+void bootloaderJumpToSlot(const uint32_t stack, const uint32_t startPointer);
 }
 }
 }

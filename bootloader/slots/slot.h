@@ -2,11 +2,18 @@
 #define BOOTLOADER_SLOTS_SLOT_H
 
 #include <stdint.h>
-
 #include "kernel_header.h"
 #include "userland_header.h"
 
 namespace Bootloader {
+
+enum class SlotType {
+  Raw,
+  Epsilon,
+  Omega,
+  Upsilon,
+  Khi,
+};
 
 class Slot {
 
@@ -18,18 +25,16 @@ public:
 
   const KernelHeader* kernelHeader() const;
   const UserlandHeader* userlandHeader() const;
-  [[ noreturn ]] void boot() const;
   const uint32_t address() const { return m_address; }
+  virtual SlotType type() const { return SlotType::Raw; }
 
-  static const Slot A();
-  static const Slot B();
-  static const Slot Khi();
+  [[ noreturn ]] void boot() const;
 
-  static bool isFullyValid(const Slot& slot) {
-    return slot.kernelHeader()->isValid() && slot.userlandHeader()->isValid();
+  bool valid() const {
+    return m_kernelHeader->isValid() && m_userlandHeader->isValid();
   }
 
-private:
+protected:
   const KernelHeader* m_kernelHeader;
   const UserlandHeader* m_userlandHeader;
   const uint32_t m_address;

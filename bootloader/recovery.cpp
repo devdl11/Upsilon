@@ -6,6 +6,7 @@
 #include <assert.h>
 
 #include <bootloader/interface/static/interface.h>
+#include <bootloader/slots/slots_manager.h>
 #include <bootloader/slots/slot.h>
 #include <bootloader/usb_data.h>
 #include <bootloader/interface/menus/slot_recovery.h>
@@ -26,19 +27,19 @@ void Bootloader::Recovery::crash_handler(const char *error) {
 }
 
 bool Bootloader::Recovery::hasCrashed() {
-  bool isA = Bootloader::Slot::A().kernelHeader()->isValid() && Bootloader::Slot::A().userlandHeader()->isValid();
-  bool isB = Bootloader::Slot::B().kernelHeader()->isValid() && Bootloader::Slot::B().userlandHeader()->isValid();
+  bool isA = Bootloader::SlotsManager::A()->valid();
+  bool isB = Bootloader::SlotsManager::B()->valid();
 
   bool isACrashed = false;
   bool isBCrashed = false;
 
   if (isA) {
-    const uint32_t * storage = (uint32_t *)Bootloader::Slot::A().userlandHeader()->storageAddress();
+    const uint32_t * storage = (uint32_t *)Bootloader::SlotsManager::A()->userlandHeader()->storageAddress();
     isACrashed = *storage == MagicStorage;
   }
 
   if (isB) {
-    const uint32_t * storage = (uint32_t *)Bootloader::Slot::B().userlandHeader()->storageAddress();
+    const uint32_t * storage = (uint32_t *)Bootloader::SlotsManager::B()->userlandHeader()->storageAddress();
     isBCrashed = *storage == MagicStorage;
   }
 
@@ -46,28 +47,28 @@ bool Bootloader::Recovery::hasCrashed() {
 }
 
 Bootloader::Recovery::CrashedSlot Bootloader::Recovery::getSlotConcerned() {
-  bool isA = Bootloader::Slot::A().kernelHeader()->isValid() && Bootloader::Slot::A().userlandHeader()->isValid();
-  bool isB = Bootloader::Slot::B().kernelHeader()->isValid() && Bootloader::Slot::B().userlandHeader()->isValid();
+  bool isA = Bootloader::SlotsManager::A()->valid();
+  bool isB = Bootloader::SlotsManager::B()->valid();
 
   bool isACrashed = false;
   bool isBCrashed = false;
 
   if (isA) {
-    const uint32_t * storage = (uint32_t *)Bootloader::Slot::A().userlandHeader()->storageAddress();
+    const uint32_t * storage = (uint32_t *)Bootloader::SlotsManager::A()->userlandHeader()->storageAddress();
     isACrashed = *storage == MagicStorage;
   }
 
   if (isB) {
-    const uint32_t * storage = (uint32_t *)Bootloader::Slot::B().userlandHeader()->storageAddress();
+    const uint32_t * storage = (uint32_t *)Bootloader::SlotsManager::B()->userlandHeader()->storageAddress();
     isBCrashed = *storage == MagicStorage;
   }
 
   assert(isACrashed || isBCrashed);
 
   if (isACrashed) {
-    return CrashedSlot(Bootloader::Slot::A().userlandHeader()->storageSize(), Bootloader::Slot::A().userlandHeader()->storageAddress());
+    return CrashedSlot(Bootloader::SlotsManager::A()->userlandHeader()->storageSize(), Bootloader::SlotsManager::A()->userlandHeader()->storageAddress());
   } else {
-    return CrashedSlot(Bootloader::Slot::B().userlandHeader()->storageSize(), Bootloader::Slot::B().userlandHeader()->storageAddress());
+    return CrashedSlot(Bootloader::SlotsManager::B()->userlandHeader()->storageSize(), Bootloader::SlotsManager::B()->userlandHeader()->storageAddress());
   }
 }
 

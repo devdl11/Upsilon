@@ -1,5 +1,5 @@
-#include <bootloader/slots/kernel_header.h>
 #include <bootloader/utility.h>
+#include "kernel_header.h"
 
 namespace Bootloader {
 
@@ -15,13 +15,6 @@ const bool KernelHeader::isValid() const {
   return m_header == Magic && m_footer == Magic;
 }
 
-const uint32_t* KernelHeader::stackPointer() const {
-  return m_stackPointer;
-}
-
-const void(*KernelHeader::startPointer() const)() {
-  return m_startPointer;
-}
 
 const bool KernelHeader::isAboveVersion16 () const {
   int sum = Utility::versionSum(m_version, 2);

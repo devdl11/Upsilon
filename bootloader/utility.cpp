@@ -8,3 +8,11 @@ int Utility::versionSum(const char * version, int length) {
   }
   return sum;
 }
+
+int Utility::atoi(const char * str) {
+  int result = 0;
+  for (int i = 0; str[i] != '\0'; i++) {
+    result = result * 10 + str[i] - '0';
+  }
+  return result;
+}

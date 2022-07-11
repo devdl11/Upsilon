@@ -443,6 +443,18 @@ bool pcbVersionIsLocked() {
   return *reinterpret_cast<const uint8_t *>(InternalFlash::Config::OTPLockAddress(k_pcbVersionOTPIndex)) == 0;
 }
 
+void jump(const uint32_t * stack, const uint32_t startPointer) {
+  asm volatile ("MSR msp, %0" : : "r" (stack) : );
+  void (*SysMemBootJump)(void);
+	SysMemBootJump = (void (*)(void)) (((uint32_t *) (startPointer)));
+	SysMemBootJump();
+}
+
+void bootloaderJumpToSlot(const uint32_t stack, const uint32_t startPointer) {
+  const uint32_t * p = (((uint32_t *) stack));
+  jump(p, startPointer);
+}
+
 void jumpToInternalBootloader() {
   asm volatile ("cpsie i" : : : "memory");
 
@@ -450,11 +462,8 @@ void jumpToInternalBootloader() {
   STM32::hal_deinit();
   STM32::systick_deinit();
 
-  const uint32_t p = (*((uint32_t *) 0x1FF00000));
-  asm volatile ("MSR msp, %0" : : "r" (p) : );
-  void (*SysMemBootJump)(void);
-	SysMemBootJump = (void (*)(void)) (*((uint32_t *) 0x1FF00004));
-	SysMemBootJump();
+  const uint32_t * p = (uint32_t *)(*((uint32_t *) 0x1FF00000));
+  jump(p, (*((uint32_t *) 0x1FF00004)));
 }
 
 }

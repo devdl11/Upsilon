@@ -3,13 +3,16 @@ bootloader_src += $(addprefix bootloader/,\
   utility.cpp \
   boot.cpp \
   main.cpp \
-  jump_to_firmware.s \
   trampoline.cpp \
   recovery.cpp \
   usb_data.cpp \
 )
 
 bootloader_src += $(addprefix bootloader/slots/, \
+  slots_manager.cpp \
+  epsilon_slot.cpp \
+  omega_slot.cpp \
+  khi_slot.cpp \
   slot_exam_mode.cpp \
   slot.cpp \
   userland_header.cpp \

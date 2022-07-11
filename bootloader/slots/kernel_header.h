@@ -13,8 +13,8 @@ public:
   const bool isValid() const;
   const bool isAboveVersion16() const;
 
-  const uint32_t* stackPointer() const;
-  const void(*startPointer() const)();
+  const uint32_t stackPointer() const {return m_stackPointer;}
+  const uint32_t startPointer() const {return m_startPointer;}
 
 private:
   KernelHeader();
@@ -25,8 +25,8 @@ private:
   const char m_version[8];
   const char m_patchLevel[8];
   const uint32_t m_footer;
-  const uint32_t* m_stackPointer;
-  const void(*m_startPointer)();
+  const uint32_t m_stackPointer;
+  const uint32_t m_startPointer;
 };
 
 }

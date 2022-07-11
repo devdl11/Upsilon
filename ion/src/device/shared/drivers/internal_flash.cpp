@@ -380,6 +380,13 @@ void ClearErrors() {
   FLASH.SR()->set(sr);
 }
 
+void ClearKeys() {
+  FLASH.KEYR()->set(0x00000000);
+  FLASH.KEYR()->set(0x00000000);
+  FLASH.OPTKEYR()->set(0x00000000);
+  FLASH.OPTKEYR()->set(0x00000000);
+}
+
 }
 }
 }

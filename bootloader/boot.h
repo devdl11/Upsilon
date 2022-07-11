@@ -10,14 +10,14 @@ class BootConfig {
 public:
     BootConfig() : m_slot(nullptr), m_booting(false) {};
 
-    void setSlot(Slot * slot) { m_slot = slot; }
-    Slot * slot() const { return m_slot; }
+    void setSlot(const Slot * slot) { m_slot = slot; }
+    const Slot * slot() const { return m_slot; }
     void clearSlot() { m_slot = nullptr; }
 
     void setBooting(bool booting) { m_booting = booting; }
     bool isBooting() const { return m_booting; }
 private:
-    Bootloader::Slot * m_slot;
+    const Bootloader::Slot * m_slot;
     bool m_booting;
 };
 
@@ -44,7 +44,7 @@ public:
 
   __attribute__ ((noreturn)) static void boot();
 
-  static void bootSlot(Bootloader::Slot slot);
+  static void bootSlot(const Bootloader::Slot * slot);
   static void bootSelectedSlot();
   __attribute__ ((noreturn)) static void jumpToInternalBootloader(); 
   __attribute((section(".fake_isr_function"))) __attribute__((used)) static void flash_interrupt();
